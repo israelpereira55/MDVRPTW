@@ -1,12 +1,15 @@
-import numpy as np
-import math
+'''
+    Depot Class
 
+        * On this problem, the number of vehicles is the same for all depots. 
+          So this number is stored on MDVRPTW.
+'''
 
 class Depot:
     index : int             # can be 1 to number of depots
     customer_id : int       # the customer number from the instance
     route_max_time : int
-    vehicle_max_load : int   
+    vehicle_max_load : int
 
     x : float               # 2D coordinates 
     y : float
