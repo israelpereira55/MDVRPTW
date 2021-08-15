@@ -4,29 +4,24 @@ def plot_clusterization(clustered_clients, clients_coordinates, depots):
 	colors = ['blue', 'green', 'red', 'darkviolet', 'darkorange', 'pink', 'maroon']
 	color_index = 0
 
-	for clustered_depot in clustered_clients:
+	for clustered_depot in enumerate(clustered_clients):
 		color = colors[color_index]
 		color_index += 1
 		for client in clustered_depot:
 			x,y = clients_coordinates[client]
-			#plt.plot(x,y, 'o', color=color, marker=".", markersize=8);
 			plt.plot(x,y, 'o', color=color, marker=".", markersize=8);
-
 
 	color_index = 0
 	for depot in depots:
 		color = colors[color_index]
 		color_index += 1
-
 		plt.plot(depot.x,depot.y, color=color, marker="s", markersize=12);
-
 
 	plt.show()
 
 def plot_clusterization_with_line(clustered_clients, clients_coordinates, depots):
 	colors = ['blue', 'green', 'red', 'darkviolet', 'darkorange', 'pink', 'maroon']
 	index = 0
-
 
 	for clustered_depot in clustered_clients:
 		depot = depots[index]
@@ -47,7 +42,6 @@ def plot_clusterization_with_line(clustered_clients, clients_coordinates, depots
 		index +=1
 
 		plt.plot(depot.x,depot.y, color=color, marker="s", markersize=10);
-
 
 	plt.show()
 
@@ -89,7 +83,3 @@ def plot_mdvrptw_solution(mdvrptw_solution):
 
 
 	plt.show()
-
-
-
-
