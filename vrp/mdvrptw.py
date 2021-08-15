@@ -1,6 +1,7 @@
 import numpy as np
 import math
 
+import geometry
 from vrp import VRPTW, Depot, MDVRPTW_Solution
 from vrp import solomon
 
@@ -27,14 +28,9 @@ class MDVRPTW:
     number_of_clients : int
     number_of_depots : int
 
-    # clustered_clients
-
 
     def __init__(self, instance_file):
         self.read_instance(instance_file)
-
-        #self.vrptw_subproblems = []
-        return
 
 
     def read_instance(self, instance_file):
@@ -87,7 +83,7 @@ class MDVRPTW:
             self.time_windows[client_id] = ready_time, due_date
             self.services[client_id] = service
             self.demands[client_id] = demand
-            
+
 
         depot_index = 0
         start = 1+ self.number_of_depots +self.number_of_clients
@@ -112,26 +108,7 @@ class MDVRPTW:
             self.coordinates[depot_customer_id] = x,y
             depot_index += 1
 
-
-        self.travel_times = self.distances = self.calculate_distance_matrix(self.coordinates)
-
-
-    def calculate_distance_matrix(self,coordinates, ro1=1, ro2=0):
-        #number_of_lines,number_of_columns = coordinates.shape
-
-        number_of_lines = len(coordinates)
-        distances = np.zeros((number_of_lines, number_of_lines))
-        #travel_times = np.zeros((number_of_lines, number_of_lines))
-
-        for i in range(number_of_lines):
-            x1,y1 = coordinates[i]
-            for j in range(i, number_of_lines):
-                x2,y2 = coordinates[j]
-                distances[i][j] = distances[j][i] = math.sqrt( (x1-x2)**2 + (y1-y2)**2 )
-
-                #travel_times[i][j] = ro1 * distances[i][j] + ro2 * time_windows
-
-        return distances
+        self.travel_times = self.distances = geometry.distances.calculate_distance_matrix(self.coordinates)
 
 
     def print_instance(self, debug=False):
@@ -168,123 +145,3 @@ class MDVRPTW:
 
             print("\n  SERVICE")
             print(self.services, "\n")
-            #return vrptw_example
-
-
-    # GIOSA, 2002
-    # Article: New assignment algorithms for the multi-depot vehicle routing problem
-    def create_cluster_by_urgencies(self):
-        closest_depots_index = np.zeros((self.number_of_clients +1))
-        for c in range(1, self.number_of_clients +1):
-
-            lowest_distance = self.distances[c][self.depots[0].customer_id] #initiating with the distance of the first depot
-            closest_depot_index = self.depots[0].index
-
-            for i in range(self.number_of_depots):
-                depot = self.depots[i]
-                depot_id = depot.customer_id
-                if self.distances[c][depot_id] < lowest_distance:
-                    lowest_distance = self.distances[c][depot_id]
-                    closest_depot_index = depot.index
-
-            closest_depots_index[c] = closest_depot_index
-
-
-        uc_list = np.zeros((self.number_of_clients, 2)) #uc list has only possible clients and does not include client 0.
-
-        for c in range(1, self.number_of_clients +1):
-            sumatory = 0
-            for i in range(self.number_of_depots):
-                depot_id = self.depots[i].customer_id
-                sumatory += self.distances[c][depot_id]
-
-            closest_depot_index = int(closest_depots_index[c])
-            u_c = sumatory - self.distances[c][closest_depot_index]
-            uc_list[c-1] = u_c, c #uc list has only possible clients and does not include client 0.
-
-        #u_c_list.sort(key=itemgetter(0))
-        uc_list_ordered = sorted(uc_list, key=lambda tup: tup[0], reverse=True)
-
-
-        maximum_demands = np.zeros((self.number_of_depots))
-        for i in range(self.number_of_depots):
-            maximum_demands[i] = self.depots[i].vehicle_max_load * self.number_of_vehicles
-
-        #clustered_clients = [[]] * self.number_of_depots
-        clustered_clients = []
-        for i in range(self.number_of_depots):
-            clustered_clients.append([])
-            clustered_clients[i].append(self.depots[i].customer_id)
-
-
-        for i in range(len(uc_list_ordered)):
-            customer_id = int(uc_list_ordered[i][1])
-            closest_depot_index = int(closest_depots_index[customer_id])
-
-            if self.demands[customer_id] <= maximum_demands[closest_depot_index]:
-                clustered_clients[closest_depot_index].append(customer_id)
-                maximum_demands[closest_depot_index] -= self.demands[customer_id]
-            else:
-
-                client_got_clusterized = False
-                for i in range(self.number_of_depots):
-                    if self.demands[customer_id] <= maximum_demands[i]: #it's just an if. It's better to re ask about closest_depot_index than using a double if for all iterations (if demand suport and if it's not closest depot id)
-                        clustered_clients[i].append(customer_id)
-                        maximum_demands[i] -= self.demands[customer_id]
-                        client_got_clusterized = True
-                        break
-
-                    
-                if not client_got_clusterized:
-                    print("[WARN]: Could not cluster by urgencies.")
-                    return None
-
-        return clustered_clients
-
-
-
-    '''
-    def create_solution_clustering_by_urgencies(self):
-
-        mdvrptw_solution = MDVRPTW_Solution()
-        for i in range(self.number_of_depots):
-            vrptw_subproblem = VRPTW(number_of_vertices = len(self.clustered_clients[i]))
-            vrptw_subproblem.create_by_cluster(vrptw_index=i, clustered_clients=self.clustered_clients[i], depot=self.depots[i], mdvrptw=self)
-            #vrptw_subproblem.print_instance()
-            mdvrptw_solution.vrptw_subproblems.append(vrptw_subproblem)
-
-            print("CLUSTER", i)
-            print(self.clustered_clients[i])
-
-        return mdvrptw_solution
-
-    
-    def create_vrptw_subproblems(self):
-
-        #self.vrptw_subproblems = []
-        for i in range(self.number_of_depots):
-            vrptw_subproblem = VRPTW(number_of_vertices = len(self.clustered_clients[i]))
-            vrptw_subproblem.create_by_cluster(vrptw_index=i, clustered_clients=self.clustered_clients[i], depot=self.depots[i], mdvrptw=self)
-            #vrptw_subproblem.print_instance()
-            self.vrptw_subproblems.append(vrptw_subproblem)
-
-            print("CLUSTER", i)
-            print(self.clustered_clients[i])
-            #vrptw_subproblem.print_instance(debug=True)
-            #exit(1)
-    
-
-
-    def construct_solution_with_solomon(self, alpha1, alpha2, mu, lambdaa, debug=False, debug_level2=False):
-        
-        vrptw_solutions = []
-        for vrptw_subproblem in self.vrptw_subproblems:
-            vrptw_solution = solomon.insertion_heuristic(vrptw_subproblem, alpha1, alpha2, mu, lambdaa, debug, debug_level2)
-            vrptw_solutions.append(vrptw_solution)
-
-            #print(vrptw_solution.routes)
-            #exit(1)
-
-        return vrptw_solutions
-    '''
-

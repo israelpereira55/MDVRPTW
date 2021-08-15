@@ -1,5 +1,7 @@
-import numpy as np
 import math
+import numpy as np
+
+import geometry
 
 
 class VRPTW:
@@ -16,7 +18,7 @@ class VRPTW:
     is_initiated = False
     #clustered_clients
 
-    def __init__(self, number_of_vertices): # +1 for depot
+    def __init__(self, number_of_vertices): # depot is included.
         self.coordinates = np.zeros((number_of_vertices,2))
         self.distances = np.zeros((number_of_vertices, number_of_vertices))
         self.time_windows = np.zeros((number_of_vertices,2))
@@ -76,53 +78,15 @@ class VRPTW:
         self.services[0] = depot.service_time
         self.demands[0] = 0.0
 
-        #self.number_of_clients += 1
-        
-        
-        customer_id = 1
         for i in range(1, self.number_of_clients +1):
             customer = clustered_clients[i]
-            self.coordinates[customer_id] = mdvrptw.coordinates[customer]
-            self.time_windows[customer_id] = mdvrptw.time_windows[customer]
-            self.services[customer_id] = mdvrptw.services[customer]
-            self.demands[customer_id] = mdvrptw.demands[customer]
-
-            customer_id +=1
+            self.coordinates[i] = mdvrptw.coordinates[customer]
+            self.time_windows[i] = mdvrptw.time_windows[customer]
+            self.services[i] = mdvrptw.services[customer]
+            self.demands[i] = mdvrptw.demands[customer]
         
-        '''
-        index = 0
-        for vertice in clustered_clients: # also has the depot
-            self.coordinates[index] = mdvrptw.coordinates[vertice]
-            self.time_windows[index] = mdvrptw.time_windows[vertice]
-            self.services[index] = mdvrptw.services[vertice]
-            self.demands[index] = mdvrptw.demands[vertice]
-
-            index +=1
-        '''
-
-        self.travel_times = self.distances = self.calculate_distance_matrix(self.coordinates)
+        self.travel_times = self.distances = geometry.distances.calculate_distance_matrix(self.coordinates)
         self.clustered_clients = clustered_clients
-
-
-
-    def calculate_distance_matrix(self,coordinates, ro1=1, ro2=0):
-        #number_of_lines,number_of_columns = coordinates.shape
-
-        number_of_lines = len(coordinates)
-        distances = np.zeros((number_of_lines, number_of_lines))
-        #travel_times = np.zeros((number_of_lines, number_of_lines))
-
-        for i in range(number_of_lines):
-            x1,y1 = coordinates[i]
-            for j in range(i, number_of_lines):
-                x2,y2 = coordinates[j]
-                distances[i][j] = distances[j][i] = math.sqrt( (x1-x2)**2 + (y1-y2)**2 )
-
-                #travel_times[i][j] = ro1 * distances[i][j] + ro2 * time_windows
-
-        return distances
-
-    #def calculate_travel_time
 
 
     def create_renatos_example(self,):
@@ -182,6 +146,5 @@ class VRPTW:
 
             print("\n  SERVICE")
             print(self.services, "\n")
-            #return vrptw_example
 
 

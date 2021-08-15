@@ -1,5 +1,5 @@
-import numpy as np
 import math
+import numpy as np
 
 from vrp import VRPTW, solomon
 
@@ -11,21 +11,19 @@ class MDVRPTW_Solution:
 
 
     def __init__(self, mdvrptw, clustered_clients):
-        self.mdvrptw = mdvrptw
-
         self.vrptw_solutions = []
         self.vrptw_subproblems = []
         self.clustered_clients = clustered_clients
 
-        for i in range(self.mdvrptw.number_of_depots):
-            vrptw_subproblem = VRPTW(number_of_vertices = len(self.clustered_clients[i]))
-            vrptw_subproblem.create_by_cluster(vrptw_index=i, clustered_clients=self.clustered_clients[i], depot=self.mdvrptw.depots[i], mdvrptw=self.mdvrptw)
-            self.vrptw_subproblems.append(vrptw_subproblem)
+        for i in range(mdvrptw.number_of_depots):
+            vrptw = VRPTW(number_of_vertices = len(clustered_clients[i]))
+            vrptw.create_by_cluster(vrptw_index=i, clustered_clients=clustered_clients[i], depot=mdvrptw.depots[i], mdvrptw=mdvrptw)
+            self.vrptw_subproblems.append(vrptw)
 
+        self.mdvrptw = mdvrptw
 
 
     def construct_solution_with_solomon(self, alpha1, alpha2, mu, lambdaa, debug=False, debug_level2=False):
-        
         vrptw_solutions = []
         for vrptw_subproblem in self.vrptw_subproblems:
             vrptw_solution = solomon.insertion_heuristic(vrptw_subproblem, alpha1, alpha2, mu, lambdaa, debug, debug_level2)
