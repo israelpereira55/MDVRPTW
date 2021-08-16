@@ -40,13 +40,6 @@
     <br />
     It is under development and research.
     <br />
-    <a><strong>VRP Libraries»</strong></a>
-    <br />
-    <a href="http://www.vrp-rep.org">VRP-REP</a>
-    ·
-    <a href="https://github.com/othneildrew/Best-README-Template/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/othneildrew/Best-README-Template/issues">Request Feature</a>
   </p>
 </p>
 
@@ -83,12 +76,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
-
-This is an algorithm that seeks to get the optimum solutions for the MDVRPTW. It is under development and research.
-
-
-First we use some methods to clusterize the depots and then we are using the Solomon I1 Insertion Heuristic to construct the initial solution.
+First we use some methods to clusterize the depots and then we are using the Solomon I1 Insertion Heuristic to construct the initial solution. And then... WIP.
 
 
 
@@ -109,6 +97,12 @@ To get a local copy up and running follow these simple example steps.
 ### Prerequisites
 
 Python 3.6 or higher is required.
+You also need a MDVRPTW problem instancy, which you can get on VRP Libraries.
+We will list some libraries in which you can get them. We have the "instances" folder with Cordeuat and Vidal MDVRPTW instances, mostly for backup reasons. You can use them too!
+You can also make your own instance, but it needs to follow Cordeaut standards. 
+
+* [VRP-REP](http://www.vrp-rep.org/variants/item/mdvrptw.html)
+* [NEO LCC](https://neo.lcc.uma.es/vrp/vrp-instances/multiple-depot-vrp-instances/)
 
 ### Installation
 
@@ -132,32 +126,12 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 
 
 
-<!-- ROADMAP -->
-## Roadmap
-
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a list of proposed features (and known issues).
-
-
-
-<!-- CONTRIBUTING -->
-## Contributing
-
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-
-
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
+Israel - israelpereira55@gmail.com
 
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
+Project Link: [https://github.com/israelpereira55/MDVRPTW-Solomon](https://github.com/israelpereira55/MDVRPTW-Solomon)
 
 
 
