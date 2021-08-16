@@ -65,7 +65,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-The Vehicle Routing Problem (VRP) is a known combinatorial problem for it's difficult. On this project, we seek to solve the Multi Depot Vehicle Routing Problem with Time Windows (MDVRPTW) which is harder!. 
+The Vehicle Routing Problem (VRP) is a known combinatorial problem for it's difficult NP-hard. On this project, we seek to solve the Multi Depot Vehicle Routing Problem with Time Windows (MDVRPTW) which is harder!. 
 
 First we use a set of cluster methods to clusterize the depots and after that the Solomon I1 Insertion Heuristic is used to construct the initial solution. And then... WIP =).
 
