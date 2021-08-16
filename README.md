@@ -33,15 +33,11 @@
     <img src="images/mona-lisa100K.gif" alt="Logo" width="500" height="500">
   </a>
 
-  <h3 align="center">Let's solve MDVRPTW</h3>
+  <h3 align="center">Let's solve the MDVRPTW!</h3>
 
   <p align="center">
-    An awesome README template to jumpstart your projects!
-    <br />
-    <a href="https://github.com/othneildrew/Best-README-Template"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a>
+    This is an algorithm that seeks to get the optimum solutions for the MDVRPTW. It is under development and research.
+    <a href="https://github.com/othneildrew/Best-README-Template">VRP REP</a>
     ·
     <a href="https://github.com/othneildrew/Best-README-Template/issues">Report Bug</a>
     ·
@@ -84,15 +80,17 @@
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
-An algorithm for MDVRPTW. 
+This is an algorithm that seeks to get the optimum solutions for the MDVRPTW. It is under development and research.
+
+
 First we use some methods to clusterize the depots and then we are using the Solomon I1 Insertion Heuristic to construct the initial solution.
 
-Work in progress.
+
 
 ### Clustering Methods
 
 This section should list any major frameworks that you built your project using. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-* [K-Means](https://getbootstrap.com)
+* [K-Means]
 * [Urgencies](https://jquery.com)
 
 
@@ -105,11 +103,7 @@ To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
-* pip
-  ```sh
-  sudo python -m pip install -r requirements.txt
-  ```
+Python 3.6 or higher is required.
 
 ### Installation
 
@@ -150,13 +144,6 @@ Contributions are what make the open source community such an amazing place to b
 3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
-
-
-<!-- LICENSE -->
-## License
-
-Distributed under the MIT License. See `LICENSE` for more information.
 
 
 
