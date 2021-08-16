@@ -114,11 +114,11 @@ Here we describe the algorithm parameters.
 
 ```bash
     main.py:
-    **(obrigatory)**
+        (obrigatory)
         --instance: path to the MDVRPTW instance.
         (default: None)
 
-    **(optional)**
+        (optional)
         --cluster: the cluster method to use.
         (default: 'kmeans')
         (options: 'kmeans', 'urgencies')
