@@ -17,12 +17,6 @@
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
 
 
 
@@ -125,11 +119,11 @@ Python 3.6 or higher is required.
 Here we describe the algorithm parameters.
 
 - **(Obrigatory)**
-    - --instance 
+    1. --instance 
         - path for the MDVRPTW instance.
 
 - **(Optional)**
-    - --cluster _Default: kmeans_
+    2. --cluster _Default: kmeans_
         - Options: (kmeans/urgencies)
 
 
@@ -145,6 +139,8 @@ Here we describe the algorithm parameters.
 Israel - israelpereira55@gmail.com
 
 Project Link: [https://github.com/israelpereira55/MDVRPTW-Solomon](https://github.com/israelpereira55/MDVRPTW-Solomon)
+
+[![LinkedIn][linkedin-shield]][linkedin-url]
 
 
 
