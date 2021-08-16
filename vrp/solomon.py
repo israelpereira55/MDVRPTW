@@ -13,25 +13,10 @@ def create_route_farthest_clienter(vrptw_instance, ordered_tuple):
     route[1] = client[0]
     return route
 
-
-'''    EXAMPLE:
-
-    distances = [0, -1, 3, 2]xz
-
-    ordered_indexers = np.argsort(distances) = ([1, 0, 3, 2])
-    ordered_clients_distance = []
-
-'''
-#def create_tuple_ordered_clients_by_distance(vrptw_instance):
-#    tuple_clients = [[0,0]] * (vrptw_instance.number_of_clients -1) #depot
-#    for i in range(1, vrptw_instance.number_of_clients):
-#        tuple_clients[i -1] = i, vrptw_instance.distances[0][i]
-
 def create_tuple_ordered_clients_by_distance(vrptw_instance):
     tuple_clients = [[0,0]] * (vrptw_instance.number_of_clients)
     for i in range(1, vrptw_instance.number_of_clients+1):
         tuple_clients[i -1] = i, vrptw_instance.distances[0][i]
-
     
     ordered_tuple = sorted(tuple_clients, key=lambda tup: tup[1], reverse = True)
     return tuple_clients, ordered_tuple
@@ -52,8 +37,6 @@ def insertion_heuristic(vrptw_instance, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1,
     route_index = 0
     #tuple_clients, ordered_tuple = create_tuple_ordered_clients_by_distance(vrptw_instance)
     _, ordered_tuple = create_tuple_ordered_clients_by_distance(vrptw_instance)
-    #print("ordered tuple")
-    #print(ordered_tuple)
     
     #Do while, I miss you </3
     route = create_route_farthest_clienter(vrptw_instance, ordered_tuple) #it will remove the first element from ordered tuple
@@ -66,7 +49,6 @@ def insertion_heuristic(vrptw_instance, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1,
         route = solution.routes[route_index] #not necessary, actually
         route_starting_times = solution.get_route_starting_times(route_index)
         if debug_level2: print("STARTING TIMES: ", route_starting_times)
-
 
         c1_list = []
         #Ordered tuple of clients corrected by demand
@@ -113,7 +95,6 @@ def insertion_heuristic(vrptw_instance, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1,
                 if not viable: #goto feelings.
                     continue
 
-                #print("Calculating ({},{},{})\n". format(i,u,j))
                 #If it goes here, then the insertion is viable
                 c11 = calculate_c11(vrptw_instance, i, u, j, mu)
                 c12 = bju - bj #PF, really?
@@ -171,8 +152,4 @@ def insertion_heuristic(vrptw_instance, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1,
                 route_string = solution.get_route_bland_string(route_index)
                 print("[SEED]: New Route ", route_string, "\n")
 
-
-    #solution.print_solution(vrptw_instance)
     return solution
-
-
