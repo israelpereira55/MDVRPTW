@@ -36,7 +36,8 @@
   <h3 align="center">Let's solve the MDVRPTW!</h3>
 
   <p align="center">
-    This is an algorithm that seeks to get the optimum solutions for the MDVRPTW. It is under development and research.
+    This is an algorithm that seeks to get the optimum solutions for the MDVRPTW. 
+    It is under development and research.
     <a href="https://github.com/othneildrew/Best-README-Template">VRP REP</a>
     ·
     <a href="https://github.com/othneildrew/Best-README-Template/issues">Report Bug</a>
