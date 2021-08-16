@@ -40,7 +40,9 @@
     <br />
     It is under development and research.
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a>
+    <a><strong>VRP Libraries»</strong></a>
+    <br />
+    <a href="http://www.vrp-rep.org">VRP-REP</a>
     ·
     <a href="https://github.com/othneildrew/Best-README-Template/issues">Report Bug</a>
     ·
