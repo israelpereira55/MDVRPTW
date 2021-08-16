@@ -131,7 +131,7 @@ Here we describe the algorithm parameters.
 <!-- CONTACT -->
 ## Contact
 
-Israel - israelpereira55@gmail.com
+Israel P. - israelpereira55@gmail.com
 
 Project Link: [https://github.com/israelpereira55/MDVRPTW](https://github.com/israelpereira55/MDVRPTW)
 
