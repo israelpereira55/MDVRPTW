@@ -1,4 +1,4 @@
-# MDVRPTW-Solomon
+# MDVRPTW
 
 <!--
 *** Thanks for checking out the Best-README-Template. If you have a suggestion
@@ -6,7 +6,6 @@
 *** or simply open an issue with the tag "enhancement".
 *** Thanks again! Now go create something AMAZING! :D
 -->
-
 
 
 <!-- PROJECT SHIELDS -->
