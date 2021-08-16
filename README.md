@@ -118,7 +118,7 @@ Here we describe the algorithm parameters.
         - path for the MDVRPTW instance.
 
 - **(Optional)**
-    1. --cluster _Default: kmeans_
+    1. --cluster _(Default: kmeans)_
         - Options: (kmeans/urgencies)
 
 
