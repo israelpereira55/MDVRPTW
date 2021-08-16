@@ -112,14 +112,17 @@ Python 3.6 or higher is required.
 
 Here we describe the algorithm parameters.
 
-- **(Obrigatory)**
-    1. --instance 
-        - path for the MDVRPTW instance.
+```bash
+    main.py:
+    **(obrigatory)**
+        --instance: path to the MDVRPTW instance.
+        (default: None)
 
-- **(Optional)**
-    1. --cluster _(Default: kmeans)_
-        - Options: (kmeans/urgencies)
-
+    **(optional)**
+        --cluster: the cluster method to use.
+        (default: 'kmeans')
+        (options: 'kmeans', 'urgencies')
+```
 
 * Example of usage:
    ```
