@@ -171,5 +171,5 @@ Project Link: [https://github.com/israelpereira55/MDVRPTW-Solomon](https://githu
 [license-shield]: https://img.shields.io/github/license/israelpereira55/MDVRPTW-Solomon.svg?style=for-the-badge
 [license-url]: https://github.com/israelpereira55/MDVRPTW-Solomon/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
+[linkedin-url]: https://www.linkedin.com/in/israel-souza-06737118b/
 [product-screenshot]: images/screenshot.png
