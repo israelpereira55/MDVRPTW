@@ -76,7 +76,9 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-First we use some methods to clusterize the depots and then we are using the Solomon I1 Insertion Heuristic to construct the initial solution. And then... WIP.
+The Vehicle Routing Problem (VRP) is a known combinatorial problem for it's difficult. On this project, we seek to solve the Multi Depot Vehicle Routing Problem with Time Windows (MDVRPTW) which is harder!. 
+
+First we use a set of cluster methods to clusterize the depots and after that the Solomon I1 Insertion Heuristic is used to construct the initial solution. And then... WIP =).
 
 
 
@@ -91,18 +93,18 @@ This section should list any major frameworks that you built your project using.
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+First you need a MDVRPTW problem instancy, which you can get on VRP Libraries.
+We will list some libraries in which you can get them. We have the "instances" folder with Cordeuat and Vidal MDVRPTW instances, mostly for backup purposes but You can use them too!
 
-### Prerequisites
-
-Python 3.6 or higher is required.
-You also need a MDVRPTW problem instancy, which you can get on VRP Libraries.
-We will list some libraries in which you can get them. We have the "instances" folder with Cordeuat and Vidal MDVRPTW instances, mostly for backup reasons. You can use them too!
 You can also make your own instance, but it needs to follow Cordeaut standards. 
 
 * [VRP-REP](http://www.vrp-rep.org/variants/item/mdvrptw.html)
 * [NEO LCC](https://neo.lcc.uma.es/vrp/vrp-instances/multiple-depot-vrp-instances/)
+
+### Prerequisites
+
+Python 3.6 or higher is required.
+
 
 ### Installation
 
@@ -118,12 +120,23 @@ You can also make your own instance, but it needs to follow Cordeaut standards.
 
 
 <!-- USAGE EXAMPLES -->
-## Usage
+## Flags description
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+Here we describe the algorithm parameters.
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+- **(Obrigatory)**
+    - --instance 
+        - path for the MDVRPTW instance.
 
+- **(Optional)**
+    - --cluster _Default: kmeans_
+        - Options: (kmeans/urgencies)
+
+
+* Example of usage:
+   ```
+   python main.py --instance ./instances/cordeau-al-2001-mdvrptw/pr01.txt --cluster kmeans
+   ```
 
 
 <!-- CONTACT -->
@@ -137,34 +150,30 @@ Project Link: [https://github.com/israelpereira55/MDVRPTW-Solomon](https://githu
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Img Shields](https://shields.io)
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Pages](https://pages.github.com)
-* [Animate.css](https://daneden.github.io/animate.css)
-* [Loaders.css](https://connoratherton.com/loaders)
-* [Slick Carousel](https://kenwheeler.github.io/slick)
-* [Smooth Scroll](https://github.com/cferdinandi/smooth-scroll)
-* [Sticky Kit](http://leafo.net/sticky-kit)
-* [JVectorMap](http://jvectormap.com)
-* [Font Awesome](https://fontawesome.com)
+* [Best README Template](https://github.com/israelpereira55/MDVRPTW-Solomon)
 
+
+## References
+
+[1] Cordeau, Jean-François, Gilbert Laporte, and Anne Mercier. "A unified tabu search heuristic for vehicle routing problems with time windows." Journal of the Operational research society 52.8 (2001): 928-936.
+
+[2] Giosa, I. D., I. L. Tansini, and I. O. Viera. "New assignment algorithms for the multi-depot vehicle routing problem." Journal of the operational research society 53.9 (2002): 977-984.
 
 
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/israelpereira55/MDVRPTW-Solomon.svg?style=for-the-badge
+[contributors-url]: https://github.com/israelpereira55/MDVRPTW-Solomon/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/israelpereira55/MDVRPTW-Solomon.svg?style=for-the-badge
+[forks-url]: https://github.com/israelpereira55/MDVRPTW-Solomon/network/members
+[stars-shield]: https://img.shields.io/github/stars/israelpereira55/MDVRPTW-Solomon.svg?style=for-the-badge
+[stars-url]: https://github.com/israelpereira55/MDVRPTW-Solomon/stargazers
+[issues-shield]: https://img.shields.io/github/issues/israelpereira55/MDVRPTW-Solomon.svg?style=for-the-badge
+[issues-url]: https://github.com/israelpereira55/MDVRPTW-Solomon/issues
+[license-shield]: https://img.shields.io/github/license/israelpereira55/MDVRPTW-Solomon.svg?style=for-the-badge
+[license-url]: https://github.com/israelpereira55/MDVRPTW-Solomon/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/othneildrew
 [product-screenshot]: images/screenshot.png
