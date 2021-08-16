@@ -133,7 +133,7 @@ Here we describe the algorithm parameters.
 
 Israel - israelpereira55@gmail.com
 
-Project Link: [https://github.com/israelpereira55/MDVRPTW-Solomon](https://github.com/israelpereira55/MDVRPTW-Solomon)
+Project Link: [https://github.com/israelpereira55/MDVRPTW](https://github.com/israelpereira55/MDVRPTW)
 
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
@@ -141,7 +141,7 @@ Project Link: [https://github.com/israelpereira55/MDVRPTW-Solomon](https://githu
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
-* [Best README Template](https://github.com/israelpereira55/MDVRPTW-Solomon)
+* [Best README Template](https://github.com/israelpereira55/MDVRPTW)
 
 
 ## References
@@ -155,16 +155,4 @@ Project Link: [https://github.com/israelpereira55/MDVRPTW-Solomon](https://githu
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/israelpereira55/MDVRPTW-Solomon.svg?style=for-the-badge
-[contributors-url]: https://github.com/israelpereira55/MDVRPTW-Solomon/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/israelpereira55/MDVRPTW-Solomon.svg?style=for-the-badge
-[forks-url]: https://github.com/israelpereira55/MDVRPTW-Solomon/network/members
-[stars-shield]: https://img.shields.io/github/stars/israelpereira55/MDVRPTW-Solomon.svg?style=for-the-badge
-[stars-url]: https://github.com/israelpereira55/MDVRPTW-Solomon/stargazers
-[issues-shield]: https://img.shields.io/github/issues/israelpereira55/MDVRPTW-Solomon.svg?style=for-the-badge
-[issues-url]: https://github.com/israelpereira55/MDVRPTW-Solomon/issues
-[license-shield]: https://img.shields.io/github/license/israelpereira55/MDVRPTW-Solomon.svg?style=for-the-badge
-[license-url]: https://github.com/israelpereira55/MDVRPTW-Solomon/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/israel-souza-06737118b/
-[product-screenshot]: images/screenshot.png
