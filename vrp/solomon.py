@@ -73,7 +73,7 @@ def insertion_heuristic(vrptw_instance, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1,
                     if debug_level2: print("       infeasible: bu > lu.\n")
                     continue
 
-                #Calculating Push Foward. Look for Lemma 1.1 on Solomon articles.
+                #Calculating Push Foward. Look for Lemma 1.1 on Solomon article.
                 bju = solution.calculate_starting_time(u, bu, j, route_index)
                 #bj = solution.calculate_starting_time(vrptw_instance, i, bi, j, route_index)
                 bj = route_starting_times[j]
@@ -152,4 +152,5 @@ def insertion_heuristic(vrptw_instance, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1,
                 route_string = solution.get_route_bland_string(route_index)
                 print("[SEED]: New Route ", route_string, "\n")
 
-    return solution
+    solution.travel_distance = solution.calculate_cost() #TODO deve dar pra fazer em cima, verificar
+    return solution 
