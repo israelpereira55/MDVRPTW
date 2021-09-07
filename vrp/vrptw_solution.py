@@ -17,6 +17,7 @@ class VRPTW_Solution:
     def __init__(self, vrptw):
         self.vrptw = vrptw
         self.global_demand = 0
+        self.travel_distance = 0. #cost
 
         self.routes = []
         self.free_capacities = []
@@ -51,7 +52,7 @@ class VRPTW_Solution:
     #si : service time of client i
     #tij: travel time from i to j
     def calculate_starting_time(self, i, bi, j, route_index): #bj-*********************
-        route = self.routes[route_index]
+        #route = self.routes[route_index]
         ej = self.vrptw.time_windows[j][0]
         #bi = route_starting_times[i]
         si = self.vrptw.services[i]
@@ -63,6 +64,7 @@ class VRPTW_Solution:
         route_size = len(route)
 
         route_starting_times = np.zeros((self.number_of_vertices))
+        #route_starting_times[0] = self.vrptw.
         for index in range(1, route_size -1): #depot removed
             i = route[index -1]
             j = route[index]
@@ -93,8 +95,71 @@ class VRPTW_Solution:
             string = str(route[0])
             for j in range(1, len(route)):
                 string += " - " + str(route[j])
-                route_distance += self.vrptw.distances[j-1][j]
+                ci = route[j-1]
+                cj = route[j]
+                route_distance += self.vrptw.distances[ci][cj]
 
             sum_route_distances += route_distance
             print(string, "  Travelled distance: {}, Demand: {}, Free: {}".format(round(route_distance,2), self.vrptw.vehicle_capacity - self.free_capacities[i], self.free_capacities[i]))
         print("\nTotal travelled distance:", round(sum_route_distances,2))
+
+
+    def calculate_cost(self):
+        route_distance = 0
+        sum_route_distances = 0
+        for route in self.routes:
+            for j in range(1, len(route)):
+                ci = route[j-1]
+                cj = route[j]
+                route_distance += self.vrptw.distances[ci][cj]
+
+            sum_route_distances += route_distance
+
+        return sum_route_distances
+
+    def get_two_array_solution(self):
+        array_solution = np.zeros((2, self.number_of_vertices)) #2xN, the position 0 is the depot.
+        print(self.routes)
+
+        for i in range(len(self.routes)):
+            route = self.routes[i]
+            index = 1
+            for j in range(1, len(route)-1):
+                client = route[j]
+
+                array_solution[0][client] = i
+                array_solution[1][client] = index
+                index +=1
+
+        return array_solution
+
+
+    def get_two_array_routes_without_depot(self):
+        array_routes = np.zeros((2, self.number_of_vertices-1)) #2xN, the position 0 is the depot.
+        print(self.routes)
+
+        index = 0
+        for i in range(len(self.routes)):
+            route = self.routes[i]
+            for j in range(1, len(route)-1):
+                array_routes[0][index] = i
+                array_routes[1][index] = route[j]
+                index +=1
+
+        return array_routes
+
+    def get_two_array_routes(self):
+        array_size = (self.number_of_vertices -1) + len(self.routes)*2 #number of clients + 2*number os routes (cuz of duplicated depot)
+        array_routes = np.zeros((2, array_size)) #All routes in a single array (includes depot on first and last position)
+
+        index = 0
+        for i in range(len(self.routes)):
+            route = self.routes[i]
+            print(route)
+            print(len(route))
+            for j in range(len(route)):
+                array_routes[0][index] = i
+                array_routes[1][index] = route[j]
+                index +=1
+
+        return array_routes
