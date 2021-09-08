@@ -23,15 +23,15 @@ class MDVRPTW_Solution:
         self.mdvrptw = mdvrptw
 
 
-    def construct_solution_with_solomon(self, alpha1, alpha2, mu, lambdaa, debug=False, debug_level2=False):
+    def construct_solution_with_solomon(self, alpha1, alpha2, mu, lambdaa):
         vrptw_solutions = []
         for vrptw_subproblem in self.vrptw_subproblems:
-            vrptw_solution = solomon.insertion_heuristic(vrptw_subproblem, alpha1, alpha2, mu, lambdaa, debug, debug_level2)
+            vrptw_solution = solomon.insertion_heuristic(vrptw_subproblem, alpha1, alpha2, mu, lambdaa)
             vrptw_solutions.append(vrptw_solution)
 
         self.vrptw_solutions = vrptw_solutions
 
-    #def check_if_feasible(self):
+    #def check_viability(self):
     #    if 
 
     def print_solution(self):
@@ -48,24 +48,32 @@ class MDVRPTW_Solution:
                    "\nCLUSTER:", self.clustered_clients[index])
             
             print("\n--> SOLUTION:")
-            for i in range(len(vrptw_solution.routes)):
+            for route_index, route in enumerate(vrptw_solution.routes):
                 route_distance = 0
-                route = vrptw_solution.routes[i]
 
-                string_route_vrptw = str(route[0])
-                string_route_mdvrptw = str(self.clustered_clients[index][route[0]])
+                ci_vrptw = route[0]
+                string_route_vrptw = str(ci_vrptw)
+
+                ci_mdvrptw = self.clustered_clients[route_index][route[0]]
+                string_route_mdvrptw = str(ci_mdvrptw)
+
                 for j in range(1, len(route)):
-                    string_route_vrptw += " - " + str(route[j])
-                    string_route_mdvrptw += " - " + str(self.clustered_clients[index][route[j]])
-                    route_distance += vrptw_subproblem.distances[j-1][j]
+                    cj_vrptw = route[j]
+                    cj_mdvrptw = self.clustered_clients[index][route[j]]
 
-                print(f"Route #{i}:\n" +
+                    string_route_vrptw += " - " + str(cj_vrptw)
+                    string_route_mdvrptw += " - " + str(cj_mdvrptw)
+                    route_distance += vrptw_subproblem.distances[ci_vrptw][cj_vrptw]
+
+                    ci_vrptw = cj_vrptw
+
+                print(f"Route #{route_index}:\n" +
                       string_route_vrptw + 
-                      f"\nReal route #{i}:\n" +
+                      f"\nReal route #{route_index}:\n" +
                       string_route_mdvrptw)
 
                 vrptw_route_distances += route_distance
-                print("Travelled distance: {}, Demand: {}, Free: {}".format(round(route_distance,2), vrptw_subproblem.vehicle_capacity - vrptw_solution.free_capacities[i], vrptw_solution.free_capacities[i]))
+                print("Travelled distance: {}, Demand: {}, Free: {}".format(round(route_distance,2), vrptw_subproblem.vehicle_capacity - vrptw_solution.free_capacities[route_index], vrptw_solution.free_capacities[route_index]))
                 print("")
 
 
