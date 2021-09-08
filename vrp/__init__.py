@@ -4,3 +4,4 @@ from .vrptw import VRPTW
 from .mdvrptw_solution import MDVRPTW_Solution
 from .mdvrptw import MDVRPTW
 from . import local_search
+from . import common
