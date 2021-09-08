@@ -4,6 +4,8 @@
 
 import numpy as np
 
+from vrp import common
+
 
 class VRPTW_Solution:
     #vrptw                     # The VRPTW problem instance.
@@ -33,32 +35,6 @@ class VRPTW_Solution:
         self.free_capacities.append(self.vrptw.vehicle_capacity - demand)
         self.global_demand += demand
 
-
-    def create_tuple_clients_allowed_demand(self, tuple_clients, route_index):
-        route = self.routes[route_index] 
-        free_capacity = self.free_capacities[route_index] 
-
-        corrected_tuple = []
-        for i in range(len(tuple_clients)):
-            client = tuple_clients[i][0]
-
-            if self.vrptw.demands[client] <= free_capacity: #Demand restriction
-                corrected_tuple.append(tuple_clients[i])
-
-        return corrected_tuple
-
-    #ej : TW earliest earliest time of service of client j
-    #bi : initiation time service of client i
-    #si : service time of client i
-    #tij: travel time from i to j
-    def calculate_starting_time(self, i, bi, j, route_index): #bj-*********************
-        #route = self.routes[route_index]
-        ej = self.vrptw.time_windows[j][0]
-        #bi = route_starting_times[i]
-        si = self.vrptw.services[i]
-        tij = self.vrptw.travel_times[i][j]
-        return max(ej, bi+si+tij)
-
     def get_route_starting_times(self, route_index):
         route = self.routes[route_index]
         route_size = len(route)
@@ -70,7 +46,7 @@ class VRPTW_Solution:
             j = route[index]
 
             bi = route_starting_times[i]
-            route_starting_times[j] = self.calculate_starting_time(i, bi, j, route_index) #bj
+            route_starting_times[j] = common.calculate_starting_time(self.vrptw, i, bi, j) #bj
 
         return route_starting_times
 
