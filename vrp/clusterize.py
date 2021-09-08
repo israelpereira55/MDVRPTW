@@ -14,7 +14,7 @@ def get_initial_depots(mdvrptw):
 
     return depots
 
-'''
+
 def get_depot_clusters_from_scikitlearn(mdvrptw, model):
     distances = np.zeros((mdvrptw.number_of_depots, mdvrptw.number_of_depots))
     depot_is_alocated = [False] * mdvrptw.number_of_depots
@@ -27,7 +27,7 @@ def get_depot_clusters_from_scikitlearn(mdvrptw, model):
 
     #Scikit learn cluster i x MDVRPTW depot j
     for i in range(mdvrptw.number_of_depots):
-        p1 = model.cluster_centers_[i]
+        p1 = model.subcluster_centers_[i]
         for j in range(mdvrptw.number_of_depots):
             p2 = mdvrptw.depots[j].x, mdvrptw.depots[j].y
             distances[i][j] = np.linalg.norm(p1-p2)
@@ -58,7 +58,7 @@ def get_depot_clusters_from_scikitlearn(mdvrptw, model):
 
     print(clustered_depots)
     return clustered_depots
-'''
+
 
 def get_distances_client_to_depots(client, free_capacities, mdvrptw):
     distances = np.zeros((mdvrptw.number_of_depots))
@@ -85,6 +85,56 @@ def clusterize_by_scikitlearn(mdvrptw, model, check_demand=True, show_test=False
     for i in range(mdvrptw.number_of_depots):
         clustered_clients.append([mdvrptw.depots[i].customer_id])
 
+    if check_demand:
+        free_capacities = np.zeros((mdvrptw.number_of_depots))
+
+        for i in range(mdvrptw.number_of_depots):
+            free_capacities[i] = mdvrptw.number_of_vehicles * mdvrptw.depots[i].vehicle_max_load
+        
+        #Clients start on index 1, but prediction start on index 0
+        # So prediction 1 predicts client 2.
+        for i in range(1, mdvrptw.number_of_clients +1):
+            depot = prediction[i-1]
+            if free_capacities[depot] >= mdvrptw.demands[i]:
+                clustered_clients[depot].append(i)
+            else:
+                distances = get_distances_client_to_depots(i, free_capacities, mdvrptw)
+                if show_warns: print("[WARN]: Out of demands, finding another depot to clusterize.")
+                
+                dist, index = min((dist, index) for (index, dist) in enumerate(distances))
+                clustered_clients[index].append(i)
+    else:
+        #Clients start on index 1, but prediction start on index 0
+        # So prediction 1 predicts client 2.
+        for i in range(1, mdvrptw.number_of_clients +1):
+            clustered_clients[prediction[i-1]].append(i)
+
+
+    # Validating:
+    sumatory = 0
+    for clustered_depot in clustered_clients:
+        sumatory += len(clustered_depot)
+    
+    if show_test:
+        for clustered_depot in clustered_clients:
+            print(f"Depot size:{len(clustered_depot)}", clustered_depot)
+        print("Number of clients:", sumatory)
+
+    if sumatory != mdvrptw.number_of_clients + mdvrptw.number_of_depots:
+        print("[ERROR]: The clusterization results seems to be incomplete.\nAborting...")
+        exit(1)
+
+    return clustered_clients
+
+
+
+def clusterize_by_scikitlearn_ordering_depots(mdvrptw, model, check_demand=True, show_test=False, show_warns=False):
+    X = mdvrptw.coordinates[1:mdvrptw.number_of_clients+1] #client of index 0 is nothing on the mdvrptw instance
+    #model.fit(X)
+    #prediction = model.predict(X)
+    prediction = model.fit_predict(X)
+
+    clustered_clients = get_depot_clusters_from_scikitlearn(mdvrptw, model)
 
     if check_demand:
         free_capacities = np.zeros((mdvrptw.number_of_depots))
@@ -110,6 +160,16 @@ def clusterize_by_scikitlearn(mdvrptw, model, check_demand=True, show_test=False
         for i in range(1, mdvrptw.number_of_clients +1):
             clustered_clients[prediction[i-1]].append(i)
 
+    #Ordering depots on clusters
+    ordered_clustered_clients = []
+    for i in range(mdvrptw.number_of_depots):
+        ordered_clustered_clients.append([])
+
+    for i in range(mdvrptw.number_of_depots):
+        depot = clustered_clients[i][0]
+        ordered_clustered_clients[depot - mdvrptw.number_of_clients -1] = clustered_clients[i]
+    
+    clustered_clients = ordered_clustered_clients
 
     # Validating:
     sumatory = 0
