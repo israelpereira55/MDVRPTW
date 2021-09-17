@@ -38,14 +38,14 @@ def create_tuple_ordered_clients_by_distance(vrptw):
 def calculate_c11(vrptw, i, u, j, mu):
     return vrptw.distances[i][u] + vrptw.distances[u][j] - mu * vrptw.distances[i][j]
 
-
+'''
 def insertion_heuristic_debug(vrptw, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1, debug=False, debug_level2=False):
     if debug: 
         print("=========== SOLOMON INSERTION HEURISTIC ==============\n\n",
               "Entry Parameters: alpha1 = {}, alpha2 = {}\n".format(alpha1, alpha2),
               "                  mu = {}, lambda = {}\n\n".format(mu, lambdaa))
 
-    solution = VRPTW_Solution(vrptw)
+    vrptw_solution = VRPTW_Solution(vrptw)
 
     route_index = 0
     #tuple_clients, ordered_tuple = create_tuple_ordered_clients_by_distance(vrptw)
@@ -53,19 +53,19 @@ def insertion_heuristic_debug(vrptw, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1, de
     
     #Do while, I miss you </3
     route = create_route_farthest_clienter(vrptw, ordered_tuple) #it will remove the first element from ordered tuple
-    solution.insert_route(route)
+    vrptw_solution.insert_route(route)
     if debug: 
-        route_string = solution.get_route_bland_string(route_index)
+        route_string = vrptw_solution.get_route_bland_string(route_index)
         print("[SEED]: New Route ", route_string, "\n")
 
     while len(ordered_tuple) > 0:
-        route = solution.routes[route_index] #not necessary, actually
-        route_starting_times = solution.get_route_starting_times(route_index)
+        route = vrptw_solution.routes[route_index] #not necessary, actually
+        route_starting_times = vrptw_solution.get_route_starting_times(route_index)
         if debug_level2: print("STARTING TIMES: ", route_starting_times)
 
         c1_list = []
         #Ordered tuple of clients corrected by demand
-        corrected_tuple = create_tuple_clients_allowed_demand(solution, ordered_tuple, route_index)
+        corrected_tuple = create_tuple_clients_allowed_demand(vrptw_solution, ordered_tuple, route_index)
         for u_index in range(len(corrected_tuple)):
             u = corrected_tuple[u_index][0]
 
@@ -79,7 +79,7 @@ def insertion_heuristic_debug(vrptw, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1, de
                 if debug_level2: print("     - insertion (i,u,j) = ({},{},{})".format(i,u,j))
 
                 bi = route_starting_times[i]
-                bu = solution.calculate_starting_time(i, bi, u, route_index)
+                bu = vrptw_solution.calculate_starting_time(i, bi, u, route_index)
 
                 if debug_level2: print("       bu lu", bu, vrptw.time_windows[u][1])
                 if bu > vrptw.time_windows[u][1]:
@@ -87,8 +87,8 @@ def insertion_heuristic_debug(vrptw, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1, de
                     continue
 
                 #Calculating Push Foward. Look for Lemma 1.1 on Solomon article.
-                bju = solution.calculate_starting_time(u, bu, j, route_index)
-                #bj = solution.calculate_starting_time(vrptw, i, bi, j, route_index)
+                bju = vrptw_solution.calculate_starting_time(u, bu, j, route_index)
+                #bj = vrptw_solution.calculate_starting_time(vrptw, i, bi, j, route_index)
                 bj = route_starting_times[j]
 
                 PF = bju - bj
@@ -136,7 +136,7 @@ def insertion_heuristic_debug(vrptw, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1, de
             highest_triple = max(c2_list)
 
             if debug_level2:
-                print("  Route:", solution.routes[route_index])
+                print("  Route:", vrptw_solution.routes[route_index])
                 print("  C1 List:", c1_list)
                 print("  C2 List:", c2_list)
                 print("  Selected triple:", highest_triple, "\n")
@@ -144,8 +144,8 @@ def insertion_heuristic_debug(vrptw, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1, de
             optimum_u = highest_triple[2]
             optimum_index = highest_triple[1]
 
-            solution.routes[route_index].insert(optimum_index, optimum_u)
-            solution.free_capacities[route_index] -= vrptw.demands[optimum_u]
+            vrptw_solution.routes[route_index].insert(optimum_index, optimum_u)
+            vrptw_solution.free_capacities[route_index] -= vrptw.demands[optimum_u]
 
             #linkar indices ordered x corrected tuple pra nao percorrer
             for temp in range(len(ordered_tuple)):
@@ -153,24 +153,24 @@ def insertion_heuristic_debug(vrptw, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1, de
                     ordered_tuple.pop(temp)
                     break
 
-            if debug: print("[INSERTION]: {}  (client: {})\n".format(solution.routes[route_index], optimum_u))
+            if debug: print("[INSERTION]: {}  (client: {})\n".format(vrptw_solution.routes[route_index], optimum_u))
         else:
 
             if debug: print("[INFEASIBLE CLIENT]: Could not find any viable insertion for the current route.\n                     Starting a new route...\n\n")
             route_index += 1
 
             route = create_route_farthest_clienter(vrptw, ordered_tuple) #it will remove the first element from ordered tuple
-            solution.insert_route(route)
+            vrptw_solution.insert_route(route)
             if debug: 
-                route_string = solution.get_route_bland_string(route_index)
+                route_string = vrptw_solution.get_route_bland_string(route_index)
                 print("[SEED]: New Route ", route_string, "\n")
 
-    solution.travel_distance = solution.calculate_cost() #TODO deve dar pra fazer em cima, verificar
-    return solution 
-
+    vrptw_solution.travel_distance = vrptw_solution.calculate_cost() #TODO deve dar pra fazer em cima, verificar
+    return vrptw_solution 
+'''
 
 def insertion_heuristic(vrptw, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1):
-    solution = VRPTW_Solution(vrptw)
+    vrptw_solution = VRPTW_Solution(vrptw)
 
     route_index = 0
     #tuple_clients, ordered_tuple = create_tuple_ordered_clients_by_distance(vrptw)
@@ -178,56 +178,35 @@ def insertion_heuristic(vrptw, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1):
     
     #Do while, I miss you </3
     route = create_route_farthest_clienter(vrptw, ordered_tuple) #it will remove the first element from ordered tuple
-    solution.insert_route(route)
+    vrptw_solution.insert_route(route)
 
     while len(ordered_tuple) > 0:
-        route = solution.routes[route_index] #not necessary, actually
-        route_starting_times = solution.get_route_starting_times(route_index)
+        route = vrptw_solution.routes[route_index] #not necessary, actually
+        route_starting_times = vrptw_solution.get_route_starting_times(route_index)
 
         c1_list = []
         #Ordered tuple of clients corrected by demand
-        corrected_tuple = create_tuple_clients_allowed_demand(solution, ordered_tuple, route_index)
-        for u_index in range(len(corrected_tuple)):
-            u = corrected_tuple[u_index][0]
+        corrected_tuple = create_tuple_clients_allowed_demand(vrptw_solution, ordered_tuple, route_index)
+        for u in range(len(corrected_tuple)):
+            cu = corrected_tuple[u][0]
 
             lowest_c1 = (10000, -1, -1) #(c1, route_index, u)
             #testing arc (i,u,j)
-            for current_route_index in range(1, len(route)):
-                i = route[current_route_index -1]
-                j = route[current_route_index]
-
-                bi = route_starting_times[i]
-                bu = common.calculate_starting_time(vrptw, i, bi, u)
-
-                if bu > vrptw.time_windows[u][1]:
-                    continue
-
-                #Calculating Push Foward. Look for Lemma 1.1 on Solomon article.
-                bju = common.calculate_starting_time(vrptw, u, bu, j)
-                #bj = solution.calculate_starting_time(vrptw, i, bi, j, route_index)
-                bj = route_starting_times[j]
-
-                PF = bju - bj
-
-                viable = True
-                for temp_index in range(current_route_index, len(route)): #not doing for depot
-                    j_temp = route[temp_index]
-
-                    if route_starting_times[j_temp] + PF > vrptw.time_windows[j_temp][1]:
-                        viable=False
-                        break
-
-                if not viable: #goto feelings.
+            for j in range(1, len(route)):
+                is_viable, values = common.is_insertion_viable_by_time_windows(vrptw_solution, cu, j, route_index, get_values=True)
+                if is_viable: 
+                    ci, bi, cj, bj, cu, bu, bju = values
+                else:
                     continue
 
                 #If it goes here, then the insertion is viable
-                c11 = calculate_c11(vrptw, i, u, j, mu)
+                c11 = calculate_c11(vrptw, ci, cu, cj, mu)
                 c12 = bju - bj #just PF, really?
-
                 c1 = alpha1*c11 + alpha2*c12
 
                 if c1 < lowest_c1[0]:
-                    lowest_c1 = (c1, current_route_index, u)
+                    lowest_c1 = (c1, j, cu)
+
 
             #Here we have already calculated all c1 for u client
             if lowest_c1[1] != -1: #then we have a viable insertion, which has the minimum c1 for the current u client.
@@ -237,21 +216,20 @@ def insertion_heuristic(vrptw, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1):
         if len(c1_list) > 0:
             c2_list = []
             for c1_triple in c1_list:
-                u = c1_triple[2]
+                cu = c1_triple[2]
                 c1 = c1_triple[0]
 
-                c2 = lambdaa * vrptw.distances[0][u] - c1
-                triple = (c2, c1_triple[1], u)
+                c2 = lambdaa * vrptw.distances[0][cu] - c1
+                triple = (c2, c1_triple[1], cu)
                 c2_list.append(triple)
 
             #highest_triple = max(c2_list,key=itemgetter(0))
             highest_triple = max(c2_list)
-
             optimum_u = highest_triple[2]
             optimum_index = highest_triple[1]
 
-            solution.routes[route_index].insert(optimum_index, optimum_u)
-            solution.free_capacities[route_index] -= vrptw.demands[optimum_u]
+            vrptw_solution.routes[route_index].insert(optimum_index, optimum_u)
+            vrptw_solution.free_capacities[route_index] -= vrptw.demands[optimum_u]
 
             #todo: linkar indices ordered x corrected tuple pra nao percorrer
             for temp in range(len(ordered_tuple)):
@@ -261,7 +239,7 @@ def insertion_heuristic(vrptw, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1):
         else:
             route_index += 1
             route = create_route_farthest_clienter(vrptw, ordered_tuple) #it will remove the first element from ordered tuple
-            solution.insert_route(route)
+            vrptw_solution.insert_route(route)
 
-    solution.travel_distance = solution.calculate_cost() #TODO deve dar pra fazer em cima, verificar
-    return solution 
+    vrptw_solution.travel_distance = vrptw_solution.calculate_cost() #TODO deve dar pra fazer em cima, verificar
+    return vrptw_solution 
