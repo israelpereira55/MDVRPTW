@@ -48,28 +48,37 @@ def is_swap_viable_by_demand(vrptw_solution, ci, routei_index, cj, routej_index)
 #       - city should not be on route already.
 #       - u can not be 0 or len(routeu) (Because it is the depot index)
 #
-def is_insertion_viable_by_time_windows(vrptw_solution, city, u, route_index):
+def is_insertion_viable_by_time_windows(vrptw_solution, city, u, route_index, get_values=False):
     vrptw = vrptw_solution.vrptw
     route = vrptw_solution.routes[route_index]
     route_starting_times = vrptw_solution.get_route_starting_times(route_index)
 
     ci = int(route[u-1]) #left neighbour of index u
     bi = route_starting_times[ci]
-    bu = vrptw_solution.calculate_starting_time(ci, bi, city, route_index)
-    if bu > vrptw.time_windows[u][1]: #start time higher than last time of service
-        return False
+    bu = calculate_starting_time(vrptw, ci, bi, city)
+    if bu > vrptw.time_windows[city][1]: #start time higher than last time of service
+        if get_values: 
+            return False, None
+        else: 
+            return False
 
     cj = int(route[u])
-    bju = vrptw_solution.calculate_starting_time(city, bu, cj, route_index)
+    bju = calculate_starting_time(vrptw, city, bu, cj)
     bj = route_starting_times[cj]
     PF = bju - bj
 
     for temp_index in range(u, len(route)):
         j_temp = int(route[temp_index])
         if route_starting_times[j_temp] + PF > vrptw.time_windows[j_temp][1]:
-            return False
+            if get_values: 
+                return False, None
+            else: 
+                return False
 
-    return True
+    if get_values:
+        return True, [ci, bi, cj, bj, city, bu, bju]
+    else:
+        return True
 
 
 # Function: is_insertion_swap_viable_by_time_windows
