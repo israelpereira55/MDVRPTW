@@ -133,11 +133,17 @@ class VRPTW:
 
 
         if debug:
-            print("\n  DISTANCE MATRIX ({}x{})". format(len(self.distances), len(self.distances[0])) )
+            print(f"\n  DISTANCE MATRIX ({len(self.distances)}x{len(self.distances[0])})" )
+            for i in range(vertices_number):
+                string = ''
+                for j in range(vertices_number):
+                    string += '{:.2f}'.format(self.distances[i][j]) + '   '
+                print(string)
+
             for i in range(vertices_number):
                 print(self.distances[i])
 
-            print("\n  TRAVEL TIMES ({}x{})". format(len(self.distances), len(self.distances[0])) )
+            print(f"\n  TRAVEL TIMES ({len(self.distances)}x{len(self.distances[0])})")
             for i in range(vertices_number):
                 print(self.travel_times[i])
 
