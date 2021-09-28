@@ -50,6 +50,40 @@ class VRPTW_Solution:
 
         return route_starting_times
 
+    # Swap city ci=(i, routei_index) x cj=(j, routej_index)
+    def swap_two_cities(self, i, routei_index, j, routej_index):
+        vrptw = self.vrptw
+        ci = self.routes[routei_index][i]
+        cj = self.routes[routej_index][j]
+
+        self.routes[routei_index][i] = cj
+        self.routes[routej_index][j] = ci
+
+        if routei_index != routej_index:
+            self.free_capacities[routei_index] += vrptw.demands[ci] - vrptw.demands[cj]
+            self.free_capacities[routej_index] += vrptw.demands[cj] - vrptw.demands[ci]
+
+
+        c_i_less1 = self.routes[routei_index][i-1]
+        c_i_plus1 = self.routes[routei_index][i+1]
+        c_j_less1 = self.routes[routej_index][j-1]
+        c_j_plus1 = self.routes[routej_index][j+1]
+
+        if (routei_index == routej_index) and (i == j-1):
+            self.travel_distance += \
+                   - vrptw.distances[c_i_less1][ci] - vrptw.distances[ci][cj] \
+                   - vrptw.distances[cj][c_j_plus1] \
+                   + vrptw.distances[c_i_less1][cj] + vrptw.distances[cj][ci] \
+                   + vrptw.distances[ci][c_j_plus1]
+
+            # TODO, remove vrptw.distances[ci][cj] from above
+        else:
+            self.travel_distance += \
+                   - vrptw.distances[c_i_less1][ci] - vrptw.distances[c_i_plus1][ci] \
+                   + vrptw.distances[c_i_less1][cj] + vrptw.distances[c_i_plus1][cj] \
+                   - vrptw.distances[c_j_less1][cj] - vrptw.distances[c_j_plus1][cj] \
+                   + vrptw.distances[c_j_less1][ci] + vrptw.distances[c_j_plus1][ci]
+
 
     # Presentation functions
     def get_route_bland_string(self, route_index):
@@ -62,9 +96,9 @@ class VRPTW_Solution:
         return string
 
     def print_solution(self):
-        route_distance = 0
         sum_route_distances = 0
         for i in range(len(self.routes)):
+            route_distance = 0
             route = self.routes[i]
 
             print("ROUTE #{}:".format(i))
@@ -81,9 +115,9 @@ class VRPTW_Solution:
 
 
     def calculate_cost(self):
-        route_distance = 0
         sum_route_distances = 0
         for route in self.routes:
+            route_distance = 0
             for j in range(1, len(route)):
                 ci = route[j-1]
                 cj = route[j]
