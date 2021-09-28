@@ -136,48 +136,33 @@ def is_swap_viable_by_time_windows_same_route(vrptw_solution, cp, p, cq, q, rout
     ci = int(route[p-1])
     bi = route_starting_times[ci]
     bq = calculate_starting_time(vrptw, ci, bi, cq)
-
     if bq > vrptw.time_windows[cq][1]: #start time higher than last time of service
         return False
 
-    cj = int(route[p+1])
-    bjq = calculate_starting_time(vrptw, cq, bq, cj)
-    bj = route_starting_times[cj]
-    PF = bjq - bj
-
-    for temp_index in range(p+1, q):
-        j_temp = int(route[temp_index])
-        if route_starting_times[j_temp] + PF > vrptw.time_windows[j_temp][1]:
+    ci, bi = cq, bq
+    for j in range(p, q): #p has cj as the route is i j k...., but p will be cp after insertion as i cp j k ...
+        cj = int(route[j])
+        bj = calculate_starting_time(vrptw, ci, bi, cj)
+        if bj > vrptw.time_windows[cj][1]: #start time higher than last time of service
             return False
 
-    ''' Aqui serve PF? TODO: pensar
-    #Putting p on q position. (p < q)
-    #Now i/j is the neighbour of q.
-    ci = int(route[q-1])
-    bi = route_starting_times[ci]
-    bp = vrptw_solution.calculate_starting_time(ci, bi, cp, route_index)
+        ci,bi = cj,bj # do while... </3
 
+    #ci = int(route[q-1])
+    #bp = calculate_starting_time(vrptw, ci, bi, cp)
+    #ci/bi is from q already, see for above
+    bp = calculate_starting_time(vrptw, ci, bi, cp)
     if bp > vrptw.time_windows[cp][1]: #start time higher than last time of service
         return False
 
-    cj = int(route[q+1])
-    bjp = vrptw_solution.calculate_starting_time(cp, bp, cj, route_index)
-    bj = route_starting_times[cj]
-    PF = bjp - bj
-
-    #Aqui serve PF? TODO: pensar
-    for temp_index in range(q+1, len(route)): #not doing for depot
-        j_temp = int(route[temp_index])
-        if route_starting_times[j_temp] + PF > vrptw.time_windows[j_temp][1]:
-            return False
-    '''
-
-    ci = int(route[q-1])
-    bi = route_starting_times[ci]
-    for u in range(q, len(route)):
-        cu = int(route[u])
-        bu = calculate_starting_time(vrptw, ci, bi, cu)
-        if bu > vrptw.time_windows[cu][1]: #start time higher than last time of service
+    ci,bi = cp, bq
+    for j in range(q+1, len(route)):
+        cj = int(route[j])
+        bj = calculate_starting_time(vrptw, ci, bi, cj)
+        if bj > vrptw.time_windows[cj][1]: #start time higher than last time of service
             return False
 
-        ci, bi = cu, bu
+        ci,bi = cj,bj # change python maybe? :v
+
+    #return True
+    return False

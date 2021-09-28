@@ -41,11 +41,12 @@ class MDVRPTW_Solution:
         print("\n-------------------------------------- SOLUTION -------------------------------------------")
         for index in range(self.mdvrptw.number_of_depots):
             vrptw_route_distances = 0
+            cluster = self.clustered_clients[index]
             vrptw_solution = self.vrptw_solutions[index]
             vrptw_subproblem = self.vrptw_subproblems[index]
 
             print(f"==> VRPTW SUBPROBLEM #{index}",
-                   "\nCLUSTER:", self.clustered_clients[index])
+                   "\nCLUSTER:", cluster)
             
             print("\n--> SOLUTION:")
             for route_index, route in enumerate(vrptw_solution.routes):
@@ -54,12 +55,12 @@ class MDVRPTW_Solution:
                 ci_vrptw = route[0]
                 string_route_vrptw = str(ci_vrptw)
 
-                ci_mdvrptw = self.clustered_clients[route_index][route[0]]
+                ci_mdvrptw = cluster[route[0]]
                 string_route_mdvrptw = str(ci_mdvrptw)
 
                 for j in range(1, len(route)):
                     cj_vrptw = route[j]
-                    cj_mdvrptw = self.clustered_clients[index][route[j]]
+                    cj_mdvrptw = cluster[route[j]]
 
                     string_route_vrptw += " - " + str(cj_vrptw)
                     string_route_mdvrptw += " - " + str(cj_mdvrptw)
@@ -67,7 +68,7 @@ class MDVRPTW_Solution:
 
                     ci_vrptw = cj_vrptw
 
-                print(f"Route #{route_index}:\n" +
+                print(f"Route #{route_index +1}:\n" +
                       string_route_vrptw + 
                       f"\nReal route #{route_index}:\n" +
                       string_route_mdvrptw)
@@ -95,6 +96,13 @@ class MDVRPTW_Solution:
         print("-------------------------------------------------------------------------------------------")
 
 
+    def print_conversion(self, vrptw_index):
+
+        print("\n-------------------------------------------------------------------------------------------")
+        print("VRPTW -> MDVRPTW")
+        for i, ci in enumerate(self.clustered_clients[vrptw_index]):
+            print(f'{i} -> {ci}')
+        print("-------------------------------------------------------------------------------------------")
 
 
 
