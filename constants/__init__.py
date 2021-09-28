@@ -1,0 +1,1 @@
+from .solomon import Solomon
