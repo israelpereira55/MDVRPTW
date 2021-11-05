@@ -34,6 +34,14 @@ class MDVRPTW_Solution:
     #def check_viability(self):
     #    if 
 
+    def get_travel_distance(self):
+        mdvrptw_cost = 0
+        for vrptw_solution in self.vrptw_solutions:
+            mdvrptw_cost += vrptw_solution.travel_distance
+
+        return mdvrptw_cost
+
+
     def print_solution(self):
         infeasible = False
         mdvrptw_route_distances = 0
