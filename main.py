@@ -45,17 +45,28 @@ def main(argv):
         print(clustered_clients)
 
     #plot.plot_clusterization(clustered_clients, mdvrptw.coordinates, mdvrptw.depots)
+    #clustered_clients=[[6,1,2,3,4,5]]
     plot.plot_clusterization_with_line(clustered_clients, mdvrptw.coordinates, mdvrptw.depots)
     # =====================================================
 
     mdvrptw_solution = MDVRPTW_Solution(mdvrptw, clustered_clients)
+    #mdvrptw_solution.print_conversion(vrptw_index=0)
+    #mdvrptw_solution.vrptw_subproblems[0].print_instance(debug=True)
     mdvrptw_solution.construct_solution_with_solomon(alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1)
     mdvrptw_solution.print_solution()
     plot.plot_mdvrptw_solution(mdvrptw_solution)
 
-    solution = local_search.two_opt_mdvrptw(mdvrptw_solution)
+    '''
+    mdvrptw_solution = local_search.two_opt_mdvrptw(mdvrptw_solution)
     mdvrptw_solution.print_solution()
     plot.plot_mdvrptw_solution(mdvrptw_solution)
+    
+    mdvrptw_solution = local_search.drop_one_point_intra_depot_mdvrptw(mdvrptw_solution)
+    mdvrptw_solution.print_solution()
+    plot.plot_mdvrptw_solution(mdvrptw_solution)
+    '''
+
+    local_search.local_search(mdvrptw_solution, print_solution=True)
 
 
 
