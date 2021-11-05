@@ -12,13 +12,11 @@ class VRPTW_Solution:
     #routes                    # list of routes, each route is a list of numbers. Example: [[1,3,2],[4,5]]
     #free_capacities           # list of free capacities each route has.
 
-    global_demand : int        # A sum from demands of all routes.
     number_of_vertices : int   # number of clients +1 (depot)
 
 
     def __init__(self, vrptw):
         self.vrptw = vrptw
-        self.global_demand = 0
         self.travel_distance = 0. #cost
 
         self.routes = []
@@ -33,7 +31,32 @@ class VRPTW_Solution:
         for i in range(len(route)):
             demand += self.vrptw.demands[route[i]]
         self.free_capacities.append(self.vrptw.vehicle_capacity - demand)
-        self.global_demand += demand
+
+
+    def insert_client(self, ci, u, route_index):
+        vrptw = self.vrptw
+
+        self.routes[route_index].insert(u, ci)
+        self.free_capacities[route_index] -= self.vrptw.demands[ci]
+
+        c_i_less1, c_i_plus1 = self.routes[route_index][u-1], self.routes[route_index][u+1]
+        self.travel_distance = self.travel_distance \
+           + vrptw.distances[c_i_less1][ci] + vrptw.distances[c_i_plus1][ci] \
+           - vrptw.distances[c_i_less1][c_i_plus1]
+
+
+    def remove_client(self, u, route_index):
+        vrptw = self.vrptw
+        cu = self.routes[route_index][u]
+
+        self.routes[route_index].pop(u)
+        self.free_capacities[route_index] += self.vrptw.demands[cu]
+
+        c_u_less1, c_u_plus1 = self.routes[route_index][u-1], self.routes[route_index][u] #after removing cu, u+1 is now u
+        self.travel_distance = self.travel_distance \
+           - vrptw.distances[c_u_less1][cu] - vrptw.distances[c_u_plus1][cu] \
+           + vrptw.distances[c_u_less1][c_u_plus1]
+
 
     def get_route_starting_times(self, route_index):
         route = self.routes[route_index]
