@@ -39,6 +39,13 @@ def is_swap_viable_by_demand(vrptw_solution, ci, routei_index, cj, routej_index)
     return True
 
 
+def is_insertion_viable_by_demand(vrptw_solution, ci, route_index):
+    if vrptw_solution.free_capacities[route_index] < vrptw_solution.vrptw.demands[ci]:
+        return False
+    else:
+        return True
+
+
 # Function: is_insertion_viable_by_time_windows
 #
 #   * Descrption: 
