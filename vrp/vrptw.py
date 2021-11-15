@@ -11,6 +11,7 @@ class VRPTW:
     #services      [si]     service time 
     #demands       [?] 
 
+    global_demand : int        # A sum from demands of all routes.
     vehicle_capacity : int
     number_of_vehicles : int
     number_of_clients : int
@@ -29,6 +30,7 @@ class VRPTW:
         self.number_of_vehicles = 0
         self.vehicle_capacity = 0
 
+        self.global_demand = -1
         self.clustered_clients = None
         self.depot = None
         self.index = -1
@@ -63,7 +65,7 @@ class VRPTW:
 
     def create_by_cluster(self, vrptw_index, clustered_clients, depot, mdvrptw):
         self.is_initiated = True
-        self.number_of_vehicles, self.vehicle_capacity = mdvrptw.number_of_vehicles, depot.vehicle_max_load
+        self.number_of_vehicles, self.vehicle_capacity = mdvrptw.number_of_vehicles, depot.vehicle_capacity
 
         if self.number_of_clients +1 != len(clustered_clients):
             print("[ERROR]: Number of clients of VRPTW instance differs than the number of clustered clients.")
@@ -78,15 +80,18 @@ class VRPTW:
         self.services[0] = depot.service_time
         self.demands[0] = 0.0
 
+        sum_demand = 0
         for i in range(1, self.number_of_clients +1):
             customer = clustered_clients[i]
             self.coordinates[i] = mdvrptw.coordinates[customer]
             self.time_windows[i] = mdvrptw.time_windows[customer]
             self.services[i] = mdvrptw.services[customer]
             self.demands[i] = mdvrptw.demands[customer]
+            sum_demand += mdvrptw.demands[customer]         
         
-        self.travel_times = self.distances = geometry.distances.calculate_distance_matrix(self.coordinates)
+        self.global_demand = sum_demand
         self.clustered_clients = clustered_clients
+        self.travel_times = self.distances = geometry.distances.calculate_distance_matrix(self.coordinates)
 
 
     def create_renatos_example(self,):
