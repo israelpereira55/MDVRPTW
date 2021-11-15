@@ -89,7 +89,7 @@ def clusterize_by_scikitlearn(mdvrptw, model, check_demand=True, show_test=False
         free_capacities = np.zeros((mdvrptw.number_of_depots))
 
         for i in range(mdvrptw.number_of_depots):
-            free_capacities[i] = mdvrptw.number_of_vehicles * mdvrptw.depots[i].vehicle_max_load
+            free_capacities[i] = mdvrptw.number_of_vehicles * mdvrptw.depots[i].vehicle_capacity
         
         #Clients start on index 1, but prediction start on index 0
         # So prediction 1 predicts client 2.
@@ -140,7 +140,7 @@ def clusterize_by_scikitlearn_ordering_depots(mdvrptw, model, check_demand=True,
         free_capacities = np.zeros((mdvrptw.number_of_depots))
 
         for i in range(mdvrptw.number_of_depots):
-            free_capacities[i] = mdvrptw.number_of_vehicles * mdvrptw.depots[i].vehicle_max_load
+            free_capacities[i] = mdvrptw.number_of_vehicles * mdvrptw.depots[i].vehicle_capacity
         
         #Clients start on index 1, but prediction start on index 0
         # So prediction 1 predicts client 2.
@@ -224,7 +224,7 @@ def clusterize_by_urgencies(mdvrptw, show_test=False):
 
     maximum_demands = np.zeros((mdvrptw.number_of_depots))
     for i in range(mdvrptw.number_of_depots):
-        maximum_demands[i] = mdvrptw.depots[i].vehicle_max_load * mdvrptw.number_of_vehicles
+        maximum_demands[i] = mdvrptw.depots[i].vehicle_capacity * mdvrptw.number_of_vehicles
 
     #clustered_clients = [[]] * mdvrptw.number_of_depots
     clustered_clients = []

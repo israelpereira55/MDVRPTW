@@ -10,10 +10,10 @@
 #       - si : service time of client i
 #       - tij: travel time from i to j
 #
-def calculate_starting_time(vrptw, i, bi, j): #bj-*********************
-    ej = vrptw.time_windows[j][0]
-    si = vrptw.services[i]
-    tij = vrptw.travel_times[i][j]
+def calculate_starting_time(vrptw, ci, bi, cj): #bj-*********************
+    ej = vrptw.time_windows[cj][0]
+    si = vrptw.services[ci]
+    tij = vrptw.travel_times[ci][cj]
     return max(ej, bi+si+tij)
 
 
@@ -134,36 +134,26 @@ def is_insertion_swap_viable_by_time_windows(vrptw_solution, cm, routem_index, u
 def is_swap_viable_by_time_windows_same_route(vrptw_solution, cp, p, cq, q, route_index):
     vrptw = vrptw_solution.vrptw
     route = vrptw_solution.routes[route_index]
+
+    vrptw_solution.routes[route_index][p], vrptw_solution.routes[route_index][q] = cq, cp #temporary swap to receive the correct route starting times
     route_starting_times = vrptw_solution.get_route_starting_times(route_index) # TODO da pra fazer uma vez só global?
-
-    if p > q:
-        cp, p, cq, q = cq, q, cp, p
-
-    #Putting q on p position. (p < q)
-    ci = int(route[p-1])
-    bi = route_starting_times[ci]
-    bq = calculate_starting_time(vrptw, ci, bi, cq)
-    if bq > vrptw.time_windows[cq][1]: #start time higher than last time of service
-        return False
-
-    ci, bi = cq, bq
-    for j in range(p, q): #p has cj as the route is i j k...., but p will be cp after insertion as i cp j k ...
-        cj = int(route[j])
-        bj = calculate_starting_time(vrptw, ci, bi, cj)
-        if bj > vrptw.time_windows[cj][1]: #start time higher than last time of service
+    
+    for i in range(len(route)):
+        ci = route[i]
+        bi = route_starting_times[ci]
+        if bi > vrptw.time_windows[ci][1]: #start time higher than last time of service
+            vrptw_solution.routes[route_index][p], vrptw_solution.routes[route_index][q] = cp, cq #un-doing temporary swap
             return False
 
-        ci,bi = cj,bj # do while... </3
+    vrptw_solution.routes[route_index][p], vrptw_solution.routes[route_index][q] = cp, cq #un-doing temporary swap
+    return True
 
-    #ci = int(route[q-1])
-    #bp = calculate_starting_time(vrptw, ci, bi, cp)
-    #ci/bi is from q already, see for above
-    bp = calculate_starting_time(vrptw, ci, bi, cp)
-    if bp > vrptw.time_windows[cp][1]: #start time higher than last time of service
-        return False
 
-    ci,bi = cp, bq
-    for j in range(q+1, len(route)):
+def is_feasible_by_time_windows(route, vrptw, i=0, bi=0):
+    ci = int(route[i])
+    #bi = 0 #considering depot has si = ei = 0
+
+    for j in range(1, len(route)):
         cj = int(route[j])
         bj = calculate_starting_time(vrptw, ci, bi, cj)
         if bj > vrptw.time_windows[cj][1]: #start time higher than last time of service
@@ -171,5 +161,4 @@ def is_swap_viable_by_time_windows_same_route(vrptw_solution, cp, p, cq, q, rout
 
         ci,bi = cj,bj # change python maybe? :v
 
-    #return True
-    return False
+    return True
