@@ -5,9 +5,10 @@ from vrp import VRPTW, solomon
 
 
 class MDVRPTW_Solution:   
-    #routes 
-    #demands
-    #routed_clients
+    #mdvrptw
+    #vrptw_solutions
+    #vrptw_subproblems
+    #clustered_clients
 
 
     def __init__(self, mdvrptw, clustered_clients):
@@ -113,4 +114,8 @@ class MDVRPTW_Solution:
         print("-------------------------------------------------------------------------------------------")
 
 
-
+    def check_feasibility(self, print_route=False):
+        for vrptw_solution in self.vrptw_solutions:
+            if not vrptw_solution.check_feasibility(vrptw_solution.vrptw.depot, print_route):
+                return False
+        return True
