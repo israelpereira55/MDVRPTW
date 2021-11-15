@@ -23,7 +23,6 @@ class VRPTW_Solution:
         self.free_capacities = []
         self.number_of_vertices = vrptw.number_of_clients +1
 
-
     def insert_route(self, route):
         self.routes.append(route)
 
@@ -60,18 +59,31 @@ class VRPTW_Solution:
 
     def get_route_starting_times(self, route_index):
         route = self.routes[route_index]
-        route_size = len(route)
 
         route_starting_times = np.zeros((self.number_of_vertices))
-        #route_starting_times[0] = self.vrptw.
-        for index in range(1, route_size -1): #depot removed
-            i = route[index -1]
-            j = route[index]
+        for index in range(1, len(route) -1): #depot removed
+            ci = route[index -1]
+            cj = route[index]
 
-            bi = route_starting_times[i]
-            route_starting_times[j] = common.calculate_starting_time(self.vrptw, i, bi, j) #bj
+            bi = route_starting_times[ci]
+            route_starting_times[cj] = common.calculate_starting_time(self.vrptw, ci, bi, cj) #bj
 
         return route_starting_times
+
+
+    def get_starting_time(self, route_index, u): #returns bu
+        route = self.routes[route_index]
+
+        #considering b0 = 0
+        bi = 0
+        for i in range(1, u+1):
+            ci = route[i -1]
+            cj = route[i]
+            bj = common.calculate_starting_time(self.vrptw, ci, bi, cj)
+            bi = bj
+
+        return bj
+
 
     # Swap city ci=(i, routei_index) x cj=(j, routej_index)
     def swap_two_cities(self, i, routei_index, j, routej_index):
@@ -196,3 +208,23 @@ class VRPTW_Solution:
                 index +=1
 
         return array_routes
+
+
+    def check_feasibility(self, depot, print_route=False):
+        if len(self.routes) > depot.number_of_vehicles:
+            return False
+
+        for route in self.routes:
+            if not common.is_feasible_by_time_windows(route, self.vrptw):
+                if print_route: print("Infeasible route:", route)
+                return False
+
+            sum_demands = 0
+            for ci in route:
+                sum_demands += self.vrptw.demands[ci]
+            if sum_demands > depot.vehicle_capacity:
+                return False
+
+        return True
+
+
