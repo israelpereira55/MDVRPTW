@@ -23,6 +23,7 @@ class MDVRPTW:
     #time_windows  [ei, li] earliest time of service, latest time of service 
     #services      [si]     service time 
     #demands       [?] 
+    #depots
 
     number_of_vehicles : int
     number_of_clients : int
@@ -61,7 +62,7 @@ class MDVRPTW:
         # Depots
         for i in range(self.number_of_depots):
             route_max_time, vehicle_max_load = (float(x) for x in lines[1+i].split())
-            depot = Depot(index=i, route_max_time=route_max_time, vehicle_max_load=vehicle_max_load)
+            depot = Depot(index=i, route_max_time=route_max_time, vehicle_capacity=vehicle_max_load, number_of_vehicles=self.number_of_vehicles)
             self.depots[i] = depot
 
         # Clients
