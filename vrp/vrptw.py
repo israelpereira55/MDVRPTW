@@ -20,17 +20,26 @@ class VRPTW:
     #clustered_clients
 
     def __init__(self, number_of_vertices): # depot is included.
+        '''
         self.coordinates = np.zeros((number_of_vertices,2))
         self.distances = np.zeros((number_of_vertices, number_of_vertices))
         self.time_windows = np.zeros((number_of_vertices,2))
         self.services = np.zeros((number_of_vertices))
         self.demands = np.zeros((number_of_vertices))
+        '''
+
+        #Using list instead of np vector because of DOP_Next_Depot (Local search technique).
+        self.coordinates = [[0 for x in range(2)] for y in range(number_of_vertices)]
+        self.time_windows = [[0 for x in range(2)] for y in range(number_of_vertices)]
+        self.services = [0] * number_of_vertices
+        self.demands = [0] * number_of_vertices
+        self.distances = []
 
         self.number_of_clients = number_of_vertices -1 #depot
         self.number_of_vehicles = 0
         self.vehicle_capacity = 0
 
-        self.global_demand = -1
+        self.global_demand = 0
         self.clustered_clients = None
         self.depot = None
         self.index = -1

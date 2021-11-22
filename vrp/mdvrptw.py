@@ -52,7 +52,6 @@ class MDVRPTW:
         vertices_number = self.number_of_clients + self.number_of_depots
 
         self.coordinates = np.zeros((vertices_number +1 ,2))
-        #self.distances = np.zeros((vertices_number, vertices_number))
         self.time_windows = np.zeros((self.number_of_clients +1,2))
         self.services = np.zeros((self.number_of_clients +1))
         self.demands = np.zeros((self.number_of_clients +1))

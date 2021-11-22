@@ -5,7 +5,7 @@
 import numpy as np
 
 from vrp import common
-
+import geometry
 
 class VRPTW_Solution:
     #vrptw                     # The VRPTW problem instance.
@@ -153,10 +153,11 @@ class VRPTW_Solution:
         sum_route_distances = 0
         for route in self.routes:
             route_distance = 0
+            ci = route[0]
             for j in range(1, len(route)):
-                ci = route[j-1]
                 cj = route[j]
                 route_distance += self.vrptw.distances[ci][cj]
+                ci = cj
 
             sum_route_distances += route_distance
 
@@ -210,7 +211,62 @@ class VRPTW_Solution:
         return array_routes
 
 
-    def check_feasibility(self, depot, print_route=False):
+    def get_client_location(self, ci):
+        for route_index, route in enumerate(self.routes):
+            for i in range(len(route)):
+                if route[i] == ci:
+                    return route_index, i
+
+        print("deu ruim location")
+        #exit(1)
+        return False, False
+
+    def get_client_cluster_id(self, ci_mdvrptw):
+        for i in range(1, len(self.vrptw.clustered_clients)):
+            ci = self.vrptw.clustered_clients[i]
+            if ci == ci_mdvrptw:
+                return i
+
+        return False
+
+    def add_client_to_problem(self, city_mdvrptw, city_vrptw, coordinates, time_windows, service, demand, route_index, u):
+        vrptw = self.vrptw
+        self.number_of_vertices += 1
+        vrptw.number_of_clients += 1
+
+        vrptw.coordinates.insert(city_vrptw, coordinates)
+        vrptw.time_windows.insert(city_vrptw, time_windows)
+        vrptw.services.insert(city_vrptw, service)
+        vrptw.demands.insert(city_vrptw, demand)
+        vrptw.clustered_clients.insert(city_vrptw, city_mdvrptw)
+
+        vrptw.travel_times = vrptw.distances = geometry.distances.calculate_distance_matrix(vrptw.coordinates)
+        self.insert_client(city_vrptw, u, route_index)
+
+    #if we remove the client 5, client 6 will become 5, 7 will become 6...
+    def remove_client_from_problem(self, city_vrptw, route_index, u):
+        vrptw = self.vrptw
+        self.remove_client(u, route_index)
+
+        self.number_of_vertices -= 1
+        vrptw.number_of_clients -= 1
+
+        vrptw.coordinates.pop(city_vrptw)
+        vrptw.time_windows.pop(city_vrptw)
+        vrptw.services.pop(city_vrptw)
+        vrptw.demands.pop(city_vrptw)
+        vrptw.clustered_clients.pop(city_vrptw)
+
+        for route in self.routes:
+            for i in range(1, len(route)-1):
+                if route[i] > city_vrptw:
+                    route[i] -= 1
+
+        #TODO: make it a list too?
+        vrptw.travel_times = vrptw.distances = geometry.distances.calculate_distance_matrix(vrptw.coordinates)
+
+
+    def is_feasible(self, depot, print_route=False):
         if len(self.routes) > depot.number_of_vehicles:
             return False
 
@@ -226,5 +282,3 @@ class VRPTW_Solution:
                 return False
 
         return True
-
-
