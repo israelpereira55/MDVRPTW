@@ -42,6 +42,13 @@ class MDVRPTW_Solution:
 
         return mdvrptw_cost
 
+    def recalculate_travel_distance(self):
+        mdvrptw_cost = 0
+        for vrptw_solution in self.vrptw_solutions:
+            mdvrptw_cost += vrptw_solution.calculate_cost()
+
+        return mdvrptw_cost
+
 
     def print_solution(self):
         infeasible = False
@@ -114,8 +121,8 @@ class MDVRPTW_Solution:
         print("-------------------------------------------------------------------------------------------")
 
 
-    def check_feasibility(self, print_route=False):
+    def is_feasibile(self, print_route=False):
         for vrptw_solution in self.vrptw_solutions:
-            if not vrptw_solution.check_feasibility(vrptw_solution.vrptw.depot, print_route):
+            if not vrptw_solution.is_feasible(vrptw_solution.vrptw.depot, print_route):
                 return False
         return True
