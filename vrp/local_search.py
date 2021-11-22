@@ -12,7 +12,7 @@ def two_swap_vrptw_hibrid_first_improvement(vrptw_solution):
     vrptw = vrptw_solution.vrptw
     number_of_clients = vrptw_solution.number_of_vertices -1
 
-    vrptw_solution.print_solution()
+    #vrptw_solution.print_solution()
     #vrptw_solution.travel_distance = vrptw_solution.calculate_cost()
 
     start_route, start_i, start_j = 0,1,2
@@ -105,7 +105,7 @@ def two_swap_vrptw_hibrid_best_improvement(vrptw_solution):
     vrptw = vrptw_solution.vrptw
     number_of_clients = vrptw_solution.number_of_vertices -1
 
-    vrptw_solution.print_solution()
+    #vrptw_solution.print_solution()
     #vrptw_solution.travel_distance = vrptw_solution.calculate_cost()
 
     start_routei, start_i, start_routej, start_j = 0,1, 0,2
@@ -469,9 +469,27 @@ def two_swap_vrptw_best_improvement(vrptw_solution):
             pass
 
 
-def two_swap_mdvrptw(mdvrptw_solution):
+def two_swap_mdvrptw_first_improvement(mdvrptw_solution):
     for vrptw_solution in mdvrptw_solution.vrptw_solutions:
         two_swap_vrptw_first_improvement(vrptw_solution)
+
+    return mdvrptw_solution
+
+def two_swap_mdvrptw_best_improvement(mdvrptw_solution):
+    for vrptw_solution in mdvrptw_solution.vrptw_solutions:
+        two_swap_vrptw_best_improvement(vrptw_solution)
+
+    return mdvrptw_solution
+
+def two_swap_mdvrptw_hibrid_best_improvement(mdvrptw_solution):
+    for vrptw_solution in mdvrptw_solution.vrptw_solutions:
+        two_swap_vrptw_hibrid_best_improvement(vrptw_solution)
+
+    return mdvrptw_solution
+
+def two_swap_mdvrptw_hibrid_first_improvement(mdvrptw_solution):
+    for vrptw_solution in mdvrptw_solution.vrptw_solutions:
+        two_swap_vrptw_hibrid_first_improvement(vrptw_solution)
 
     return mdvrptw_solution
 
@@ -545,27 +563,167 @@ def drop_one_point_intra_depot_mdvrptw(mdvrptw_solution):
 
     return mdvrptw_solution
 
-
-#TODO: more efficient with numpy vectors.
-def drop_one_point_inter_depot_mdvrptw(mdvrptw_solution):
+# Checks if removing ci from ci_current_depot will decrease the mdvrptw_solution cost
+# by reinserting ci on ci_next_depot on the route and index which gives the highest enhancement.
+def dop_inter_depot_check_insertion_improvement(mdvrptw_solution, ci, ci_current_di, ci_next_di):
     mdvrptw = mdvrptw_solution.mdvrptw
 
-    #Defining the 'clients_current_depot', which tells for each client, the depot it's related to.
+    ci_current_depot_index = ci_current_di - mdvrptw.number_of_clients -1
+    ci_next_depot_index = ci_next_di - mdvrptw.number_of_clients -1
+
+    vrptw_current = mdvrptw_solution.vrptw_subproblems[ci_current_depot_index]
+    vrptw_next = mdvrptw_solution.vrptw_subproblems[ci_next_depot_index]
+
+    #Calculating mdvrptw_solution cost by removing ci from ci_current_depot
+    vrptw_solution_current = mdvrptw_solution.vrptw_solutions[ci_current_depot_index]
+    ci_vrptw = vrptw_solution_current.get_client_cluster_id(ci)
+    i_current_depot = vrptw_solution_current.get_client_location(ci_vrptw)
+
+    #vrptw_solution_current.print_solution()
+
+    c_i_less1 = vrptw_solution_current.routes[ i_current_depot[0] ][ i_current_depot[1]-1 ]
+    c_i_plus1 = vrptw_solution_current.routes[ i_current_depot[0] ][ i_current_depot[1]+1 ]
+
+    c_i_less1_mdvrptw = vrptw_current.clustered_clients[c_i_less1]
+    c_i_plus1_mdvrptw = vrptw_current.clustered_clients[c_i_plus1]
+
+    mdvrptw_cost = mdvrptw_solution.get_travel_distance()
+    mdvrptw_cost_without_ci = mdvrptw_cost \
+                            - mdvrptw.distances[c_i_less1_mdvrptw][ci] - mdvrptw.distances[c_i_plus1_mdvrptw][ci] \
+                            + mdvrptw.distances[c_i_less1_mdvrptw][c_i_plus1_mdvrptw]
+                            #TODO: REMOVE GET TRAVEL DISTANCE AND WORK ONLY WITH THE COST REMOVAL AND ADDITION
+
+
+    #Now we will check the new distances
+    vrptw_solution_next = mdvrptw_solution.vrptw_solutions[ci_next_depot_index]
+
+    best_pj = -1,-1
+    got_improvement = False
+
+    mdvrptw_new_cost = float('inf')
+    mdvrptw_local_cost = mdvrptw_cost #Local means that is the mdvrptw that is seeing on the iterations inside for
+    for route_index in range(len(vrptw_solution_next.routes)): 
+    #for routei_index,routei in enumerate(vrptw_solution.routes): 
+        route = vrptw_solution_next.routes[route_index] #enumerate nao é tao bom pq tem q atualizar
+        for j in range(1, len(route)-1):
+            #print(ci, cj, f"({i},{routei_index}) x ({j}, {routej_index})")
+
+            #Checking demand
+            if vrptw_solution_next.free_capacities[route_index] < mdvrptw.demands[ci]:
+                continue
+
+            #Checking TW:
+            if not common.is_insertion_viable_by_time_windows_mdvrptw(mdvrptw_solution, ci_next_depot_index, ci, route_index, j):
+                continue
+
+            c_j_less1 = route[j-1]
+            c_j_plus1 = route[j]
+
+            c_j_less1_mdvrptw = vrptw_next.clustered_clients[c_j_less1] # real id from the mdvrptw problem
+            c_j_plus1_mdvrptw = vrptw_next.clustered_clients[c_j_plus1] # real id from the mdvrptw problem
+
+            mdvrptw_new_cost = mdvrptw_cost_without_ci \
+                            + mdvrptw.distances[c_j_less1_mdvrptw][ci] + mdvrptw.distances[c_j_plus1_mdvrptw][ci] \
+                            - mdvrptw.distances[c_j_less1_mdvrptw][c_j_plus1_mdvrptw]
+
+            #TODO: check cost for dop intra, why is it updating inside for? does it makes sense?
+            if round(mdvrptw_new_cost,2) < round(mdvrptw_local_cost,2):
+                mdvrptw_local_cost = mdvrptw_new_cost
+                best_pj = route_index, j
+                got_improvement = True
+
+
+    #print(mdvrptw_new_cost, mdvrptw_cost, mdvrptw_local_cost)
+    if mdvrptw_new_cost < mdvrptw_cost:
+        return True, mdvrptw_new_cost, best_pj[0], best_pj[1]
+
+    return False, False, False, False
+
+
+#TODO: more efficient with numpy vectors.
+def drop_one_point_next_depot_mdvrptw(mdvrptw_solution):
+    mdvrptw = mdvrptw_solution.mdvrptw
+
+    #Defining the 'clients_current_depot', which tells for each client, the closest depot customer id 
+    # it's related to.
     clients_current_depot = [-1] * (mdvrptw.number_of_clients+1)
+    #TODO: change to np
     for cluster in mdvrptw_solution.clustered_clients:
-        depot_index = cluster[0]
+        di = cluster[0]
         for i in range(1, len(cluster)):
             client = cluster[i]
-            clients_current_depot[client] = depot_index
+            clients_current_depot[client] = di
+
                 
+    # Global demands tells for each depot, the sum of demands for all clients it's related to.
+    # Max demands defines for each depot, the maximum amount of demand we can support.
     global_demands = []
     max_demands = []
     for vrptw_subproblem in mdvrptw_solution.vrptw_subproblems:
         global_demands.append(vrptw_subproblem.global_demand)
         max_demands.append(vrptw_subproblem.vehicle_capacity * vrptw_subproblem.number_of_vehicles)
 
-    clients_closest_depot = []
-    #for _ in range(mdvrptw.number_of_clients):
+
+    # For each client, we will get the closest depot which is not the depot that the client
+    # is already routed.
+    clients_closest_depot = np.zeros(( mdvrptw.number_of_clients+1))
+    for ci in range(1, mdvrptw.number_of_clients +1):
+        lowest_index = -1
+        lowest_distance = float('inf')
+        for di in range(mdvrptw.number_of_clients +1, mdvrptw.number_of_clients + mdvrptw.number_of_depots):
+            #We want to find the closest depot which the client is not already routed.
+            #So, we are skipping the client current depot
+            if di == clients_current_depot[ci]:
+                continue
+
+            distance = mdvrptw.distances[ci][di]
+            if distance < lowest_distance:
+                lowest_distance = distance
+                lowest_index = di
+
+            clients_closest_depot[ci] = lowest_index
+
+
+    # Removing the depot if the demand would surpass it.
+    for ci in range(1, mdvrptw.number_of_clients+1):
+        closest_di = int(clients_closest_depot[ci])
+        closest_depot_index = closest_di - mdvrptw.number_of_clients -1
+
+        if global_demands[closest_depot_index] + mdvrptw.demands[ci] > max_demands[closest_depot_index]:
+            clients_closest_depot[ci] = -1
+
+
+    #Now we can start checking the distances.
+    #for ci in range(1, mdvrptw.number_of_clients+1):
+        closest_di = int(clients_closest_depot[ci])
+        if closest_di == -1:
+            continue
+
+        #closest_depot_index = closest_di - mdvrptw.number_of_clients
+        #client_current_depot = clients_current_depot[ci]
+
+        got_improvement, mdvrptw_new_cost, route_index, index = dop_inter_depot_check_insertion_improvement(
+                                                                mdvrptw_solution, ci, clients_current_depot[ci], closest_di)
+
+        #Performing the inter depot insertion
+        if got_improvement:
+            current_depot_index = clients_current_depot[ci] - mdvrptw.number_of_clients -1
+            
+            ci_vrptw = mdvrptw_solution.vrptw_solutions[current_depot_index].get_client_cluster_id(ci)
+            pi = mdvrptw_solution.vrptw_solutions[current_depot_index].get_client_location(ci_vrptw)
+            mdvrptw_solution.vrptw_solutions[current_depot_index].remove_client_from_problem(city_vrptw=ci_vrptw, route_index=pi[0], u=pi[1])
+
+            ci_vrptw = len(mdvrptw_solution.vrptw_solutions[closest_depot_index].vrptw.clustered_clients)
+            mdvrptw_solution.vrptw_solutions[closest_depot_index].add_client_to_problem(
+                                ci, ci_vrptw, mdvrptw.coordinates[ci], mdvrptw.time_windows[ci], mdvrptw.services[ci], mdvrptw.demands[ci], route_index, index)
+
+        #TODO: fix clustered clients
+
+    #print(clients_closest_depot)
+    #exit(1)
+
+
+
     #    clients_closest_depot.append([])
 
     #for ci in range(1, mdvrptw.number_of_clients+1):
@@ -578,8 +736,9 @@ def drop_one_point_inter_depot_mdvrptw(mdvrptw_solution):
     for ci in range(1, mdvrptw.number_of_clients+1):
         print(ci, mdvrptw.number_of_clients)
     '''
-    print(clients_current_depot)
-    exit(1)
+    #print(clients_current_depot)
+    #print("oie")
+    #exit(1)
 
 
 # 2opt-intra
@@ -612,8 +771,8 @@ def two_opt_intra_route_old(vrptw_solution, route_index, steepest_descent=True):
                     cost_update = cost_swap(distances, best[i-1], best[i], best[j-1], best[j])
                     if cost_update < 0:
 
-                        new_route = best[:]
-                        new_route[i:j] = best[j-1:i-1:-1]
+                        new_route = route[:]
+                        new_route[i:j] = route[j-1:i-1:-1]
                         if not common.is_feasible_by_time_windows(new_route, vrptw): #TODO, define start to save time
                             continue
 
@@ -643,9 +802,9 @@ def get_cost(route, distances):
     for j in range(1, len(route)):
         cj = route[j]
         sum_dist+= distances[ci][cj]
+        ci = cj
 
     return sum_dist
-
 
 
 def two_opt_intra_route(vrptw_solution, route_index, steepest_descent=True):
@@ -653,7 +812,6 @@ def two_opt_intra_route(vrptw_solution, route_index, steepest_descent=True):
     route = vrptw_solution.routes[route_index]
     distances = vrptw.distances
     best = route
-
     cost = get_cost(route, vrptw.distances)
 
     got_improvement = True
@@ -665,17 +823,19 @@ def two_opt_intra_route(vrptw_solution, route_index, steepest_descent=True):
             # If your case is like [0,1,...,n], it should be i=1 to len(route)-2; j=i+2 to len(route)
             for i in range(1, len(route)-3):
                 for j in range(i+2, len(route) -1):
-                        new_route = best[:]
-                        new_route[i:j] = best[j-1:i-1:-1]
+                        new_route = route[:]
+                        new_route[i:j] = route[j-1:i-1:-1]
 
-                        new_cost = get_cost(new_route, vrptw.distances)
-                        if new_cost < cost:
+                        new_cost = get_cost(new_route, vrptw.distances) #TODO: do better with upper solution
+                        if round(new_cost,2) < round(cost,2):
                             if not common.is_feasible_by_time_windows(new_route, vrptw): #TODO, define start to save time
                                 continue
 
-                            cost = new_cost
                             best = new_route
+                            vrptw_solution.routes[route_index] = best
                             vrptw_solution.travel_distance = vrptw_solution.travel_distance - (cost - new_cost)
+
+                            cost = new_cost
                             got_improvement = True
 
                             if steepest_descent: 
@@ -709,42 +869,67 @@ def two_opt_intra_route_hibrid(route, distances):
 def two_opt_intra_route_mdvrptw(mdvrptw_solution):
     for vrptw_solution in mdvrptw_solution.vrptw_solutions:
         for route_index in range(len(vrptw_solution.routes)):
-            #cost = vrptw_solution.travel_distance
             two_opt_intra_route(vrptw_solution, route_index, steepest_descent=True)
 
-            '''
-            if vrptw_solution.travel_distance < cost:
-                mdvrptw_solution.print_solution()
-                print(mdvrptw_solution.get_travel_distance())
-                plot.plot_mdvrptw_solution(mdvrptw_solution)
-            '''
 
-
-def local_search(mdvrptw_solution, print_solution=False):
+def local_search_print(mdvrptw_solution, print_solution=False):
     got_improvement = True
     while got_improvement:
         got_improvement= False
         cost = mdvrptw_solution.get_travel_distance()
-
-
-        two_opt_intra_route_mdvrptw(mdvrptw_solution)
-        if print_solution and mdvrptw_solution.get_travel_distance() < cost:
-            mdvrptw_solution.print_solution()
-            plot.plot_mdvrptw_solution(mdvrptw_solution)
-
 
         two_swap_mdvrptw(mdvrptw_solution)
         if print_solution and mdvrptw_solution.get_travel_distance() < cost:
             mdvrptw_solution.print_solution()
             plot.plot_mdvrptw_solution(mdvrptw_solution)
 
-        
+        two_opt_intra_route_mdvrptw(mdvrptw_solution)
+        if print_solution and mdvrptw_solution.get_travel_distance() < cost:
+            mdvrptw_solution.print_solution()
+            plot.plot_mdvrptw_solution(mdvrptw_solution)
+
+        drop_one_point_next_depot_mdvrptw(mdvrptw_solution)
+        if print_solution and mdvrptw_solution.get_travel_distance() < cost:
+            mdvrptw_solution.print_solution()
+            plot.plot_mdvrptw_solution(mdvrptw_solution)
+
         drop_one_point_intra_depot_mdvrptw(mdvrptw_solution)
         if print_solution and mdvrptw_solution.get_travel_distance() < cost:
             mdvrptw_solution.print_solution()
             plot.plot_mdvrptw_solution(mdvrptw_solution)
 
+        if mdvrptw_solution.get_travel_distance() < cost:
+            got_improvement= True 
+
+
+def local_search(mdvrptw_solution):
+    got_improvement = True
+    while got_improvement:
+        got_improvement= False
+        cost = mdvrptw_solution.get_travel_distance()
+
+        two_swap_mdvrptw_best_improvement(mdvrptw_solution)
+        two_opt_intra_route_mdvrptw(mdvrptw_solution)
+        drop_one_point_next_depot_mdvrptw(mdvrptw_solution)
+        drop_one_point_intra_depot_mdvrptw(mdvrptw_solution)
+
+        ''' TODO: REMOVE
+        Temporary functions for test
+        '''
+        if round(mdvrptw_solution.get_travel_distance(), 2) != round(mdvrptw_solution.recalculate_travel_distance(), 2):
+            print("bad")
+            exit(1)
+
+        if not mdvrptw_solution.is_feasibile():
+            print('bad2')
+            exit(1)
+
+        if round(mdvrptw_solution.get_travel_distance(),2) != round(mdvrptw_solution.recalculate_travel_distance(),2):
+            print('bad3')
+            exit(1)
 
         if mdvrptw_solution.get_travel_distance() < cost:
             got_improvement= True 
+
+
 
