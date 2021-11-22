@@ -54,20 +54,19 @@ def main(argv):
     #mdvrptw_solution.vrptw_subproblems[0].print_instance(debug=True)
     mdvrptw_solution.construct_solution_with_solomon(alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1)
     mdvrptw_solution.print_solution()
-    plot.plot_mdvrptw_solution(mdvrptw_solution)
+    #plot.plot_mdvrptw_solution(mdvrptw_solution)
+    print("construtive", mdvrptw_solution.get_travel_distance() )
 
-    '''
-    mdvrptw_solution = local_search.two_opt_mdvrptw(mdvrptw_solution)
+    local_search.local_search(mdvrptw_solution)
     mdvrptw_solution.print_solution()
     plot.plot_mdvrptw_solution(mdvrptw_solution)
-    
-    mdvrptw_solution = local_search.drop_one_point_intra_depot_mdvrptw(mdvrptw_solution)
-    mdvrptw_solution.print_solution()
-    plot.plot_mdvrptw_solution(mdvrptw_solution)
-    '''
 
-    local_search.local_search(mdvrptw_solution, print_solution=True)
+    print("FINAL:", mdvrptw_solution.get_travel_distance())
 
+    #local_search.drop_one_point_next_depot_mdvrptw(mdvrptw_solution)
+    #mdvrptw_solution.print_solution()
+    #plot.plot_mdvrptw_solution(mdvrptw_solution)
+    #print("fiiim")
 
 
 
