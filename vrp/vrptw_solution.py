@@ -222,8 +222,8 @@ class VRPTW_Solution:
         return False, False
 
     def get_client_cluster_id(self, ci_mdvrptw):
-        for i in range(1, len(self.vrptw.clustered_clients)):
-            ci = self.vrptw.clustered_clients[i]
+        for i in range(1, len(self.vrptw.cluster)):
+            ci = self.vrptw.cluster[i]
             if ci == ci_mdvrptw:
                 return i
 
@@ -238,7 +238,7 @@ class VRPTW_Solution:
         vrptw.time_windows.insert(city_vrptw, time_windows)
         vrptw.services.insert(city_vrptw, service)
         vrptw.demands.insert(city_vrptw, demand)
-        vrptw.clustered_clients.insert(city_vrptw, city_mdvrptw)
+        vrptw.cluster.insert(city_vrptw, city_mdvrptw)
 
         vrptw.travel_times = vrptw.distances = geometry.distances.calculate_distance_matrix(vrptw.coordinates)
         self.insert_client(city_vrptw, u, route_index)
@@ -255,7 +255,7 @@ class VRPTW_Solution:
         vrptw.time_windows.pop(city_vrptw)
         vrptw.services.pop(city_vrptw)
         vrptw.demands.pop(city_vrptw)
-        vrptw.clustered_clients.pop(city_vrptw)
+        vrptw.cluster.pop(city_vrptw)
 
         for route in self.routes:
             for i in range(1, len(route)-1):

@@ -17,7 +17,7 @@ class VRPTW:
     number_of_clients : int
 
     is_initiated = False
-    #clustered_clients
+    #cluster
 
     def __init__(self, number_of_vertices): # depot is included.
         '''
@@ -40,7 +40,7 @@ class VRPTW:
         self.vehicle_capacity = 0
 
         self.global_demand = 0
-        self.clustered_clients = None
+        #self.cluster = None
         self.depot = None
         self.index = -1
 
@@ -72,11 +72,11 @@ class VRPTW:
         self.travel_times = self.distances = self.calculate_distance_matrix(self.coordinates)
     '''
 
-    def create_by_cluster(self, vrptw_index, clustered_clients, depot, mdvrptw):
+    def create_by_cluster(self, vrptw_index, cluster, depot, mdvrptw):
         self.is_initiated = True
         self.number_of_vehicles, self.vehicle_capacity = mdvrptw.number_of_vehicles, depot.vehicle_capacity
 
-        if self.number_of_clients +1 != len(clustered_clients):
+        if self.number_of_clients +1 != len(cluster):
             print("[ERROR]: Number of clients of VRPTW instance differs than the number of clustered clients.")
             exit(1)
 
@@ -91,7 +91,7 @@ class VRPTW:
 
         sum_demand = 0
         for i in range(1, self.number_of_clients +1):
-            customer = clustered_clients[i]
+            customer = cluster[i]
             self.coordinates[i] = mdvrptw.coordinates[customer]
             self.time_windows[i] = mdvrptw.time_windows[customer]
             self.services[i] = mdvrptw.services[customer]
@@ -99,7 +99,7 @@ class VRPTW:
             sum_demand += mdvrptw.demands[customer]         
         
         self.global_demand = sum_demand
-        self.clustered_clients = clustered_clients
+        self.cluster = cluster[:]
         self.travel_times = self.distances = geometry.distances.calculate_distance_matrix(self.coordinates)
 
 
