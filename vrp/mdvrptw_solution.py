@@ -14,11 +14,11 @@ class MDVRPTW_Solution:
     def __init__(self, mdvrptw, clustered_clients):
         self.vrptw_solutions = []
         self.vrptw_subproblems = []
-        self.clustered_clients = clustered_clients
+        self.clustered_clients = clustered_clients[:]
 
         for i in range(mdvrptw.number_of_depots):
             vrptw = VRPTW(number_of_vertices = len(clustered_clients[i]))
-            vrptw.create_by_cluster(vrptw_index=i, clustered_clients=clustered_clients[i], depot=mdvrptw.depots[i], mdvrptw=mdvrptw)
+            vrptw.create_by_cluster(vrptw_index=i, cluster=self.clustered_clients[i], depot=mdvrptw.depots[i], mdvrptw=mdvrptw)
             self.vrptw_subproblems.append(vrptw)
 
         self.mdvrptw = mdvrptw

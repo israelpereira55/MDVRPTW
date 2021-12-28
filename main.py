@@ -1,3 +1,5 @@
+import time, random
+
 from absl import app, flags
 FLAGS = flags.FLAGS
 
@@ -9,7 +11,7 @@ flags.DEFINE_enum('cluster', 'kmeans', ['kmeans', 'urgencies', 'other'], 'Cluste
 from vrp import MDVRPTW, VRPTW, solomon, plot
 from vrp import MDVRPTW_Solution
 
-from vrp import clusterize, local_search
+from vrp import clusterize, local_search, grasp
 from sklearn.cluster import AffinityPropagation, Birch, AgglomerativeClustering, KMeans
 
 
@@ -23,8 +25,9 @@ def main(argv):
         print("Please describe the MDVRPTW instace file.\nAborting...")
         exit(1)
 
+    #random.seed(1)
     mdvrptw.print_instance()
-    
+
     # ============ DEFINING CLUSTERS =====================
     # ScikitLearn clusters
     if FLAGS.cluster == 'kmeans':
@@ -45,28 +48,56 @@ def main(argv):
         print(clustered_clients)
 
     #plot.plot_clusterization(clustered_clients, mdvrptw.coordinates, mdvrptw.depots)
-    #clustered_clients=[[6,1,2,3,4,5]]
-    plot.plot_clusterization_with_line(clustered_clients, mdvrptw.coordinates, mdvrptw.depots)
+    #plot.plot_clusterization_with_line(clustered_clients, mdvrptw.coordinates, mdvrptw.depots)
     # =====================================================
 
-    mdvrptw_solution = MDVRPTW_Solution(mdvrptw, clustered_clients)
-    #mdvrptw_solution.print_conversion(vrptw_index=0)
-    #mdvrptw_solution.vrptw_subproblems[0].print_instance(debug=True)
-    mdvrptw_solution.construct_solution_with_solomon(alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1)
-    mdvrptw_solution.print_solution()
-    #plot.plot_mdvrptw_solution(mdvrptw_solution)
-    print("construtive", mdvrptw_solution.get_travel_distance() )
 
-    local_search.local_search(mdvrptw_solution)
-    mdvrptw_solution.print_solution()
-    plot.plot_mdvrptw_solution(mdvrptw_solution)
-
-    print("FINAL:", mdvrptw_solution.get_travel_distance())
-
-    #local_search.drop_one_point_next_depot_mdvrptw(mdvrptw_solution)
+    #mdvrptw_solution = grasp.construct_solution_with_solomon(mdvrptw, clustered_clients, alpha=0.8, max_iterations=10)
+    #print('best', mdvrptw_solution.get_travel_distance())
     #mdvrptw_solution.print_solution()
     #plot.plot_mdvrptw_solution(mdvrptw_solution)
-    #print("fiiim")
+    #exit(1)
+
+    best_value = float('inf')
+    time_start = time.time()
+    sum_value = 0
+    for i in range(0,10):
+        random.seed(i)
+        mdvrptw_solution = grasp.construct_solution_with_solomon(mdvrptw, clustered_clients, alpha=0.8, max_iterations=10)
+        sum_value += mdvrptw_solution.get_travel_distance()
+        print(mdvrptw_solution.get_travel_distance())
+
+        if mdvrptw_solution.get_travel_distance() < best_value:
+            best_value = mdvrptw_solution.get_travel_distance()
+
+    print("media")
+    print(sum_value/10)
+    time_end = time.time()
+    print("Constructive time:", (time_end - time_start)/10)
+    print("Best value", round(best_value,2))
+    exit(1)
+
+    mdvrptw_solution = MDVRPTW_Solution(mdvrptw, clustered_clients)
+
+    time_start = time.time()
+    mdvrptw_solution.construct_solution_with_solomon(alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1)
+    time_end = time.time()
+    print("Constructive time:", time_end - time_start)
+    #mdvrptw_solution.print_solution()
+    #plot.plot_mdvrptw_solution(mdvrptw_solution)
+    #print("construtive", mdvrptw_solution.get_travel_distance() )
+
+    #local_search.local_search(mdvrptw_solution)
+    
+    time_start = time.time()
+    local_search.vnd(mdvrptw_solution)
+    #local_search.local_search(mdvrptw_solution)
+    time_end = time.time()
+    print("time:", time_end - time_start)
+    mdvrptw_solution.print_solution()
+    #plot.plot_mdvrptw_solution(mdvrptw_solution)
+
+    #print("FINAL:", mdvrptw_solution.get_travel_distance())
 
 
 

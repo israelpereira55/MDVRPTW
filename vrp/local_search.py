@@ -584,8 +584,8 @@ def dop_inter_depot_check_insertion_improvement(mdvrptw_solution, ci, ci_current
     c_i_less1 = vrptw_solution_current.routes[ i_current_depot[0] ][ i_current_depot[1]-1 ]
     c_i_plus1 = vrptw_solution_current.routes[ i_current_depot[0] ][ i_current_depot[1]+1 ]
 
-    c_i_less1_mdvrptw = vrptw_current.clustered_clients[c_i_less1]
-    c_i_plus1_mdvrptw = vrptw_current.clustered_clients[c_i_plus1]
+    c_i_less1_mdvrptw = vrptw_current.cluster[c_i_less1]
+    c_i_plus1_mdvrptw = vrptw_current.cluster[c_i_plus1]
 
     mdvrptw_cost = mdvrptw_solution.get_travel_distance()
     mdvrptw_cost_without_ci = mdvrptw_cost \
@@ -619,8 +619,8 @@ def dop_inter_depot_check_insertion_improvement(mdvrptw_solution, ci, ci_current
             c_j_less1 = route[j-1]
             c_j_plus1 = route[j]
 
-            c_j_less1_mdvrptw = vrptw_next.clustered_clients[c_j_less1] # real id from the mdvrptw problem
-            c_j_plus1_mdvrptw = vrptw_next.clustered_clients[c_j_plus1] # real id from the mdvrptw problem
+            c_j_less1_mdvrptw = vrptw_next.cluster[c_j_less1] # real id from the mdvrptw problem
+            c_j_plus1_mdvrptw = vrptw_next.cluster[c_j_plus1] # real id from the mdvrptw problem
 
             mdvrptw_new_cost = mdvrptw_cost_without_ci \
                             + mdvrptw.distances[c_j_less1_mdvrptw][ci] + mdvrptw.distances[c_j_plus1_mdvrptw][ci] \
@@ -711,12 +711,15 @@ def drop_one_point_next_depot_mdvrptw(mdvrptw_solution):
             
             ci_vrptw = mdvrptw_solution.vrptw_solutions[current_depot_index].get_client_cluster_id(ci)
             pi = mdvrptw_solution.vrptw_solutions[current_depot_index].get_client_location(ci_vrptw)
+
             mdvrptw_solution.vrptw_solutions[current_depot_index].remove_client_from_problem(city_vrptw=ci_vrptw, route_index=pi[0], u=pi[1])
 
-            ci_vrptw = len(mdvrptw_solution.vrptw_solutions[closest_depot_index].vrptw.clustered_clients)
+            ci_vrptw = len(mdvrptw_solution.vrptw_solutions[closest_depot_index].vrptw.cluster)
             mdvrptw_solution.vrptw_solutions[closest_depot_index].add_client_to_problem(
                                 ci, ci_vrptw, mdvrptw.coordinates[ci], mdvrptw.time_windows[ci], mdvrptw.services[ci], mdvrptw.demands[ci], route_index, index)
 
+            mdvrptw_solution.clustered_clients[current_depot_index] = mdvrptw_solution.vrptw_solutions[current_depot_index].vrptw.cluster
+            mdvrptw_solution.clustered_clients[closest_depot_index] = mdvrptw_solution.vrptw_solutions[closest_depot_index].vrptw.cluster
         #TODO: fix clustered clients
 
     #print(clients_closest_depot)
@@ -903,18 +906,46 @@ def local_search_print(mdvrptw_solution, print_solution=False):
 
 
 def local_search(mdvrptw_solution):
+    it = 1
     got_improvement = True
     while got_improvement:
         got_improvement= False
         cost = mdvrptw_solution.get_travel_distance()
 
+        #print(it)
+        it+=1
+
+        if round(mdvrptw_solution.recalculate_travel_distance(),2) != round(mdvrptw_solution.get_travel_distance(),2):
+            print("aqui0")
+            exit(1)
+
         two_swap_mdvrptw_best_improvement(mdvrptw_solution)
+        if round(mdvrptw_solution.recalculate_travel_distance(),2) != round(mdvrptw_solution.get_travel_distance(),2):
+            print("aqui1")
+            exit(1)
+
+
         two_opt_intra_route_mdvrptw(mdvrptw_solution)
+        if round(mdvrptw_solution.recalculate_travel_distance(),2) != round(mdvrptw_solution.get_travel_distance(),2):
+            print("aqui2")
+            exit(1)
+
         drop_one_point_next_depot_mdvrptw(mdvrptw_solution)
+        if round(mdvrptw_solution.recalculate_travel_distance(),2) != round(mdvrptw_solution.get_travel_distance(),2):
+            print("aqui3")
+            exit(1)
+
         drop_one_point_intra_depot_mdvrptw(mdvrptw_solution)
+        if round(mdvrptw_solution.recalculate_travel_distance(),2) != round(mdvrptw_solution.get_travel_distance(),2):
+            print("aqui4")
+            exit(1)
+
+
 
         ''' TODO: REMOVE
         Temporary functions for test
+        '''
+
         '''
         if round(mdvrptw_solution.get_travel_distance(), 2) != round(mdvrptw_solution.recalculate_travel_distance(), 2):
             print("bad")
@@ -927,9 +958,55 @@ def local_search(mdvrptw_solution):
         if round(mdvrptw_solution.get_travel_distance(),2) != round(mdvrptw_solution.recalculate_travel_distance(),2):
             print('bad3')
             exit(1)
-
+        '''
+        #it += 4
         if mdvrptw_solution.get_travel_distance() < cost:
             got_improvement= True 
+    #print('ut', it)
 
 
 
+def vnd(mdvrptw_solution):
+
+    got_improvement = True
+    while got_improvement:
+        got_improvement= False
+        cost = mdvrptw_solution.get_travel_distance()
+
+        while True:
+            two_swap_mdvrptw_best_improvement(mdvrptw_solution)
+            if round(mdvrptw_solution.get_travel_distance(),8) < round(cost,8):
+                got_improvement= True
+                break
+
+            two_opt_intra_route_mdvrptw(mdvrptw_solution)
+            if round(mdvrptw_solution.get_travel_distance(),8) < round(cost,8):
+                got_improvement= True
+                break
+
+            drop_one_point_next_depot_mdvrptw(mdvrptw_solution)
+            if round(mdvrptw_solution.get_travel_distance(),8) < round(cost,8):
+                got_improvement= True
+                break
+            
+            drop_one_point_intra_depot_mdvrptw(mdvrptw_solution)
+            if round(mdvrptw_solution.get_travel_distance(),8) < round(cost,8):
+                got_improvement= True
+                break
+
+            break
+
+
+        '''
+        if round(mdvrptw_solution.get_travel_distance(), 2) != round(mdvrptw_solution.recalculate_travel_distance(), 2):
+            print("bad")
+            exit(1)
+
+        if not mdvrptw_solution.is_feasibile():
+            print('bad2')
+            exit(1)
+
+        if round(mdvrptw_solution.get_travel_distance(),2) != round(mdvrptw_solution.recalculate_travel_distance(),2):
+            print('bad3')
+            exit(1)
+        '''

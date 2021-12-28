@@ -127,14 +127,14 @@ def is_insertion_viable_by_time_windows_mdvrptw(mdvrptw_solution, problem_index,
 
 
     ci = int(route[u-1]) #left neighbour of index u
-    ci_mdvrptw = vrptw.clustered_clients[ci]
+    ci_mdvrptw = vrptw.cluster[ci]
     bi = route_starting_times[ci]
     bu = calculate_starting_time_mdvrptw(mdvrptw, ci_mdvrptw, bi, city)
     if bu > mdvrptw.time_windows[city][1]: #start time higher than last time of service
         return False
 
     cj = int(route[u])
-    cj_mdvrptw = vrptw.clustered_clients[cj]
+    cj_mdvrptw = vrptw.cluster[cj]
     bju = calculate_starting_time_mdvrptw(mdvrptw, city, bu, cj_mdvrptw)
     bj = route_starting_times[cj]
     PF = bju - bj
