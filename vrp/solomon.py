@@ -7,14 +7,13 @@ from vrp import VRPTW_Solution, common
 from operator import itemgetter #to get max in a tuple, stackoverflow says its faster than lambda and pure python, see bellow and check someday 
 # https://stackoverflow.com/questions/13145368/find-the-maximum-value-in-a-list-of-tuples-in-python
 
-
 def get_tuple_of_clients(vrptw):
     tuple_clients = [[0,0]] * (vrptw.number_of_clients)
+    #tuple_clients = np.zeros((vrptw.number_of_clients,2), dtype=int)
     for ci in range(1, vrptw.number_of_clients+1):
         tuple_clients[ci -1] = ci, vrptw.distances[0][ci]
 
     return tuple_clients
-
 
 def create_route_closest_tw(vrptw, tuple_clients):
     closest_index = -1
@@ -54,6 +53,7 @@ def create_tuple_clients_allowed_demand(vrptw_solution, tuple_clients, route_ind
 
 def create_tuple_ordered_clients_by_distance(vrptw):
     tuple_clients = [[0,0]] * (vrptw.number_of_clients)
+    #tuple_clients = np.zeros((vrptw.number_of_clients,2), dtype=int)
     for i in range(1, vrptw.number_of_clients+1):
         tuple_clients[i -1] = i, vrptw.distances[0][i]
     
@@ -195,12 +195,12 @@ def insertion_heuristic_debug(vrptw, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1, de
     return vrptw_solution 
 '''
 
-def insertion_heuristic(vrptw, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1, 
-                        init_criteria=constants.Solomon.FARTHEST_CLIENT):
+def insertion_heuristic(vrptw, solomon_settings):
     vrptw_solution = VRPTW_Solution(vrptw)
-
     route_index = 0
-    #tuple_clients, ordered_tuple = create_tuple_ordered_clients_by_distance(vrptw)
+
+    alpha1, alpha2, mu, lambdaa = solomon_settings.alpha1, solomon_settings.alpha2, solomon_settings.mu, solomon_settings.lamdaa
+    init_criteria = solomon_settings.init_criteria
     
     #Do while, I miss you </3
     if init_criteria == constants.Solomon.FARTHEST_CLIENT:
@@ -286,20 +286,25 @@ def insertion_heuristic(vrptw, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1,
     return vrptw_solution 
 
 
-def greedy_randomized_construction_solomon(alpha, vrptw, alpha1=0.5, alpha2=0.5, mu=1, lambdaa=1, 
-                        init_criteria=constants.Solomon.FARTHEST_CLIENT):
+def greedy_randomized_construction_solomon(alpha, vrptw, solomon_settings):
 
     vrptw_solution = VRPTW_Solution(vrptw)
-
     route_index = 0
-    #tuple_clients, ordered_tuple = create_tuple_ordered_clients_by_distance(vrptw)
-    
+
+    alpha1, alpha2, mu, lambdaa = solomon_settings.alpha1, solomon_settings.alpha2, solomon_settings.mu, solomon_settings.lambdaa
+    init_criteria = solomon_settings.init_criteria
+
     #Do while, I miss you </3
     if init_criteria == constants.Solomon.FARTHEST_CLIENT:
         _, ordered_tuple = create_tuple_ordered_clients_by_distance(vrptw)
         route = create_route_farthest_client(vrptw, ordered_tuple) #it will remove the first element from ordered tuple
         vrptw_solution.insert_route(route)
 
+    elif init_criteria == constants.Solomon.CLOSEST_TW:
+        tuple_clients = get_tuple_of_clients(vrptw)
+        route = create_route_closest_tw(vrptw, tuple_clients)
+        vrptw_solution.insert_route(route)
+        ordered_tuple = tuple_clients #TODO: rename to tuple_clients on the whole function
 
     while len(ordered_tuple) > 0:
         route = vrptw_solution.routes[route_index] #not necessary, actually
@@ -349,6 +354,7 @@ def greedy_randomized_construction_solomon(alpha, vrptw, alpha1=0.5, alpha2=0.5,
 
             c2_list.sort(key = lambda x: x[0])
             grasp_num_elementos = math.ceil(len(c2_list)*(1-alpha))
+            if grasp_num_elementos == 0: grasp_num_elementos = 1
             grasp_index = random.randint(len(c2_list) -grasp_num_elementos, len(c2_list) -1)
             highest_triple = c2_list[grasp_index]
 
