@@ -78,7 +78,7 @@ def is_insertion_viable_by_time_windows(vrptw_solution, city, u, route_index, ge
     route = vrptw_solution.routes[route_index]
     route_starting_times = vrptw_solution.get_route_starting_times(route_index)
 
-    ci = int(route[u-1]) #left neighbour of index u
+    ci = route[u-1] #left neighbour of index u
     bi = route_starting_times[ci]
     bu = calculate_starting_time(vrptw, ci, bi, city)
     if bu > vrptw.time_windows[city][1]: #start time higher than last time of service
@@ -87,13 +87,13 @@ def is_insertion_viable_by_time_windows(vrptw_solution, city, u, route_index, ge
         else: 
             return False
 
-    cj = int(route[u])
+    cj = route[u]
     bju = calculate_starting_time(vrptw, city, bu, cj)
     bj = route_starting_times[cj]
     PF = bju - bj
 
     for temp_index in range(u, len(route)):
-        j_temp = int(route[temp_index])
+        j_temp = route[temp_index]
         if route_starting_times[j_temp] + PF > vrptw.time_windows[j_temp][1]:
             if get_values: 
                 return False, None
@@ -126,21 +126,22 @@ def is_insertion_viable_by_time_windows_mdvrptw(mdvrptw_solution, problem_index,
     route_starting_times = vrptw_solution.get_route_starting_times(route_index)
 
 
-    ci = int(route[u-1]) #left neighbour of index u
-    ci_mdvrptw = vrptw.cluster[ci]
+    ci = route[u-1] #left neighbour of index u
+    ci_mdvrptw = mdvrptw_solution.get_client_id_mdvrptw(depot_index=problem_index, ci_vrptw=ci)
+
     bi = route_starting_times[ci]
     bu = calculate_starting_time_mdvrptw(mdvrptw, ci_mdvrptw, bi, city)
     if bu > mdvrptw.time_windows[city][1]: #start time higher than last time of service
         return False
 
-    cj = int(route[u])
-    cj_mdvrptw = vrptw.cluster[cj]
+    cj = route[u]
+    cj_mdvrptw = mdvrptw_solution.get_client_id_mdvrptw(depot_index=problem_index, ci_vrptw=cj)
     bju = calculate_starting_time_mdvrptw(mdvrptw, city, bu, cj_mdvrptw)
     bj = route_starting_times[cj]
     PF = bju - bj
 
     for temp_index in range(u, len(route)):
-        j_temp = int(route[temp_index])
+        j_temp = route[temp_index]
         if route_starting_times[j_temp] + PF > vrptw.time_windows[j_temp][1]:
             return False
 
@@ -162,19 +163,19 @@ def is_insertion_swap_viable_by_time_windows(vrptw_solution, cm, routem_index, u
     routeu = vrptw_solution.routes[routeu_index]
     routeu_starting_times = vrptw_solution.get_route_starting_times(routeu_index) # TODO da pra fazer uma vez só global?
 
-    ci = int(routeu[u-1]) #left neighbour of index u
+    ci = routeu[u-1] #left neighbour of index u
     bi = routeu_starting_times[ci]
     bm = calculate_starting_time(vrptw, ci, bi, cm)
     if bm > vrptw.time_windows[cm][1]: #start time higher than last time of service
         return False
 
-    cj = int(routeu[u+1])
+    cj = routeu[u+1]
     bjm = calculate_starting_time(vrptw, cm, bm, cj)
     bj = routeu_starting_times[cj]
     PF = bjm - bj
 
     for temp_index in range(u+1, len(routeu)):
-        j_temp = int(routeu[temp_index])
+        j_temp = routeu[temp_index]
         if routeu_starting_times[j_temp] + PF > vrptw.time_windows[j_temp][1]:
             return False
 
@@ -209,11 +210,11 @@ def is_swap_viable_by_time_windows_same_route(vrptw_solution, cp, p, cq, q, rout
 
 
 def is_feasible_by_time_windows(route, vrptw, i=0, bi=0):
-    ci = int(route[i])
+    ci = route[i]
     #bi = 0 #considering depot has si = ei = 0
 
     for j in range(1, len(route)):
-        cj = int(route[j])
+        cj = route[j]
         bj = calculate_starting_time(vrptw, ci, bi, cj)
         if bj > vrptw.time_windows[cj][1]: #start time higher than last time of service
             return False
