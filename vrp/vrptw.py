@@ -17,7 +17,6 @@ class VRPTW:
     number_of_clients : int
 
     is_initiated = False
-    #cluster
 
     def __init__(self, number_of_vertices): # depot is included.
         '''
@@ -99,7 +98,7 @@ class VRPTW:
             sum_demand += mdvrptw.demands[customer]         
         
         self.global_demand = sum_demand
-        self.cluster = cluster[:]
+        #self.cluster = cluster
         self.travel_times = self.distances = geometry.distances.calculate_distance_matrix(self.coordinates)
 
 
