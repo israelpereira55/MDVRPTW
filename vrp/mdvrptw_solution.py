@@ -1,8 +1,8 @@
 import math
 import numpy as np
+from copy import deepcopy
 
 from vrp import VRPTW, solomon
-
 
 class MDVRPTW_Solution:   
     #mdvrptw
@@ -14,10 +14,10 @@ class MDVRPTW_Solution:
     def __init__(self, mdvrptw, clustered_clients):
         self.vrptw_solutions = []
         self.vrptw_subproblems = []
-        self.clustered_clients = clustered_clients[:]
+        self.clustered_clients = deepcopy(clustered_clients)
 
         for i in range(mdvrptw.number_of_depots):
-            vrptw = VRPTW(number_of_vertices = len(clustered_clients[i]))
+            vrptw = VRPTW(number_of_vertices = len(self.clustered_clients[i]))
             vrptw.create_by_cluster(vrptw_index=i, cluster=self.clustered_clients[i], depot=mdvrptw.depots[i], mdvrptw=mdvrptw)
             self.vrptw_subproblems.append(vrptw)
 
@@ -121,8 +121,49 @@ class MDVRPTW_Solution:
         print("-------------------------------------------------------------------------------------------")
 
 
-    def is_feasibile(self, print_route=False):
+    def is_feasible(self, print_route=False):
         for vrptw_solution in self.vrptw_solutions:
             if not vrptw_solution.is_feasible(vrptw_solution.vrptw.depot, print_route):
                 return False
         return True
+
+    def is_feasible_by_number_of_vehicles(self):
+        for vrptw_solution in self.vrptw_solutions:
+            if len(vrptw_solution.routes) > vrptw_solution.vrptw.depot.number_of_vehicles:
+                return False
+        return True
+
+    def check_clients_solution(self):
+        clients = np.zeros((self.mdvrptw.number_of_clients+1))
+        n = 0
+        for depot_index, vrptw_solution in enumerate(self.vrptw_solutions):
+            for route in vrptw_solution.routes:
+                if route[0] != 0 or route[-1] != 0:
+                    print("check the route depot:", route)
+                    exit(1) 
+
+                for i in range(1,len(route)-1):
+                    ci_vrptw = route[i]
+                    ci_mdvrptw = self.get_client_id_mdvrptw(depot_index, ci_vrptw)
+
+                    if clients[ci_mdvrptw] == 1:
+                        print(f"Client {ci_mdvrptw} routered twice")
+                        exit(1)
+                    
+                    clients[ci_mdvrptw] = 1
+                    n += 1
+
+        if n != self.mdvrptw.number_of_clients:
+            print("Missing client.")
+            exit(1)
+
+
+    def get_client_id_vrptw(self, depot_index, ci_mdvrptw):
+        for i, ci_vrptw in enumerate(self.clustered_clients[depot_index]):
+            if ci_vrptw == ci_mdvrptw:
+                return i
+
+        return False
+
+    def get_client_id_mdvrptw(self, depot_index, ci_vrptw):
+        return self.clustered_clients[depot_index][ci_vrptw]
