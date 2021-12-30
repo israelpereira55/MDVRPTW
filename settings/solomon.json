@@ -1,0 +1,10 @@
+{
+    "settings": "GRASP_Settings",
+    "initCriteria" : "FARTHEST_CLIENT",
+    "alpha1" : 0.5,
+    "alpha2" : 0.5,
+    "mu" : 1,
+    "lambda" : 1,
+
+    "comment" : "InitCriteria in [CLOSEST_TW, FARTHEST_CLIENT]"
+}

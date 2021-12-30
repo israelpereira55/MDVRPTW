@@ -1,0 +1,9 @@
+{
+    "settings": "GRASP_Settings",
+    "localSearch" : "VND",
+    "alpha" : 0.8,
+    "maxIterations" : 10,
+    "numberOfAttempts" : 5,
+
+    "comment" : "localSearch in [LS, VND]"
+}
