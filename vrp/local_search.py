@@ -717,50 +717,13 @@ def local_search(mdvrptw_solution):
         got_improvement= False
         cost = mdvrptw_solution.get_travel_distance()
 
-        if round(mdvrptw_solution.recalculate_travel_distance(),2) != round(mdvrptw_solution.get_travel_distance(),2):
-            print("aqui0")
-            exit(1)
-
         two_swap_mdvrptw_best_improvement(mdvrptw_solution)
-        if round(mdvrptw_solution.recalculate_travel_distance(),2) != round(mdvrptw_solution.get_travel_distance(),2):
-            print("aqui1")
-            exit(1)
-
         two_opt_intra_route_mdvrptw(mdvrptw_solution)
-        if round(mdvrptw_solution.recalculate_travel_distance(),2) != round(mdvrptw_solution.get_travel_distance(),2):
-            print("aqui2")
-            exit(1)
-
         drop_one_point_next_depot_mdvrptw(mdvrptw_solution)
-        if round(mdvrptw_solution.recalculate_travel_distance(),2) != round(mdvrptw_solution.get_travel_distance(),2):
-            print("aqui3")
-            exit(1)
-
         drop_one_point_intra_depot_mdvrptw(mdvrptw_solution)
-        if round(mdvrptw_solution.recalculate_travel_distance(),2) != round(mdvrptw_solution.get_travel_distance(),2):
-            print("aqui4")
-            exit(1)
 
-
-        ''' TODO: REMOVE
-        Temporary functions for test
-        '''
-
-        if round(mdvrptw_solution.get_travel_distance(), 2) != round(mdvrptw_solution.recalculate_travel_distance(), 2):
-            print("bad")
-            exit(1)
-
-        if not mdvrptw_solution.is_feasible():
-            print('bad2')
-            exit(1)
-
-        if round(mdvrptw_solution.get_travel_distance(),2) != round(mdvrptw_solution.recalculate_travel_distance(),2):
-            print('bad3')
-            exit(1)
-
-        if mdvrptw_solution.get_travel_distance() < cost:
+        if round(mdvrptw_solution.get_travel_distance(),8) < round(cost,8):
             got_improvement= True 
-
 
 
 def vnd(mdvrptw_solution):
@@ -792,21 +755,3 @@ def vnd(mdvrptw_solution):
                 break
 
             break
-
-
-
-        ''' TODO: REMOVE
-        Temporary functions for test
-        '''
-
-        if round(mdvrptw_solution.get_travel_distance(), 2) != round(mdvrptw_solution.recalculate_travel_distance(), 2):
-            print("bad")
-            exit(1)
-
-        if not mdvrptw_solution.is_feasible():
-            print('bad2')
-            exit(1)
-
-        if round(mdvrptw_solution.get_travel_distance(),2) != round(mdvrptw_solution.recalculate_travel_distance(),2):
-            print('bad3')
-            exit(1)
