@@ -1,8 +1,8 @@
 {
-    "settings": "GRASP_Settings",
-    "initCriteria" : "FARTHEST_CLIENT",
-    "alpha1" : 0.5,
-    "alpha2" : 0.5,
+    "settings": "Solomon_I1_Settings",
+    "initCriteria" : "CLOSEST_TW",
+    "alpha1" : 0.4,
+    "alpha2" : 0.6,
     "mu" : 1,
     "lambda" : 1,
 

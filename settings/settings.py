@@ -3,10 +3,14 @@ from constants import Settings, Solomon
 
 class SoftwareSettings:
   def check_solve_method(self, solve_method):
-    if solve_method == 'ACO':
-      return Settings.ACO
-    else:
+    if solve_method == 'ACO_AS':
+      return Settings.ACO_AS
+    elif solve_method == 'ACO_ACS':
+      return Settings.ACO_ACS
+    elif solve_method == 'GRASP':
       return Settings.GRASP
+    else:
+      return Settings.IPGRASP
 
   def check_cluster(self, cluster):
     if cluster == 'Urgencies' or cluster == 'urgencies':
@@ -23,7 +27,14 @@ class SoftwareSettings:
     cluster_string = "Urgencies" if self.cluster == Settings.Urgencies else 'KMeans' 
 
     self.solve_method = self.check_solve_method(data['solveMethod'])
-    solve_method_string = "ACO" if self.solve_method == Settings.ACO else "GRASP"
+    if self.solve_method == Settings.ACO_AS:
+      solve_method_string = 'ACO_AS'
+    elif self.solve_method == Settings.ACO_ACS:
+      solve_method_string = 'ACO_ACS'
+    elif self.solve_method == Settings.GRASP:
+      solve_method_string = 'GRASP'
+    else:
+      solve_method_string = 'IPGRASP'
 
     if print_settings:
       print("\n========== SOFTWARE SETTINGS ============\n"
@@ -49,7 +60,10 @@ class GRASPSettings:
     self.max_iterations = data['maxIterations']
     self.number_of_attempts = data['numberOfAttempts']
     self.local_search = self.check_local_search(data['localSearch'])
-    local_search_string = "VND" if self.local_search == Settings.VND else 'LS' 
+    local_search_string = "VND" if self.local_search == Settings.VND else 'LS'
+
+    self.m = data['m']
+    self.base_alpha = data['baseAlpha'] 
 
     if print_settings:
       print("============ GRASP SETTINGS =============\n"
@@ -78,6 +92,9 @@ class ACOSettings:
     self.max_iterations = data['max_iterations']
     self.tau0 = data['tau0']
     self.Q = data['Q']
+    self.q0 = data['q0']
+    self.a1 = data['a1']
+    self.a2 = data['a2']
 
     self.local_search = self.check_local_search(data['localSearch'])
     local_search_string = "VND" if self.local_search == Settings.VND else 'LS' 

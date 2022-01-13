@@ -1,9 +1,13 @@
 {
     "settings": "GRASP_Settings",
     "localSearch" : "VND",
-    "alpha" : 0.8,
-    "maxIterations" : 10,
-    "numberOfAttempts" : 5,
+    
+    "alpha" : 0.582,
+    "maxIterations" : 10000,
+    "numberOfAttempts" : 5000,
 
-    "comment" : "localSearch in [LS, VND]"
+    "m" : 100,
+    "baseAlpha" : 0.1,
+
+    "comment" : "localSearch in [LS, VND]; m and baseAlpha are IPGRASP parameters"
 }
