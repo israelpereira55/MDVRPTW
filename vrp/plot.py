@@ -1,15 +1,36 @@
 import matplotlib.pyplot as plt
 
-def plot_clusterization(clustered_clients, clients_coordinates, depots):
+def plot_instance(mdvrptw, plot_ids=True):
+	clients_coordinates = mdvrptw.coordinates
+	depots = mdvrptw.depots
+	color = 'black'
+
+	for ci in range(1, mdvrptw.number_of_clients +1):
+		x,y = clients_coordinates[ci]
+		plt.plot(x,y, color=color, marker=".", markersize=5);
+
+	for depot in depots:
+		plt.plot(depot.x,depot.y, color=color, marker="s", markersize=7);
+
+	if plot_ids:
+		for i in range(1, mdvrptw.number_of_clients + mdvrptw.number_of_depots +1): #0 does not exist on mdvrptw
+			x,y = mdvrptw.coordinates[i]
+			plt.text(x,y , str(i), color='black', fontsize=10);
+
+	plt.savefig('instance.png', bbox_inches='tight')
+	plt.show()
+
+def plot_clusterization(mdvrptw, clustered_clients):
 	colors = ['blue', 'green', 'red', 'darkviolet', 'darkorange', 'pink', 'maroon']
 	color_index = 0
+	clients_coordinates, depots = mdvrptw.coordinates, mdvrptw.depots
 
 	for clustered_depot in enumerate(clustered_clients):
 		color = colors[color_index]
 		color_index += 1
 		for client in clustered_depot:
 			x,y = clients_coordinates[client]
-			plt.plot(x,y, 'o', color=color, marker=".", markersize=8);
+			plt.plot(x,y, color=color, marker=".", markersize=8);
 
 	color_index = 0
 	for depot in depots:
@@ -19,17 +40,18 @@ def plot_clusterization(clustered_clients, clients_coordinates, depots):
 
 	plt.show()
 
-def plot_clusterization_with_line(clustered_clients, clients_coordinates, depots):
+def plot_clusterization_with_line(mdvrptw, clustered_clients):
 	colors = ['blue', 'green', 'red', 'darkviolet', 'darkorange', 'pink', 'maroon']
-	index = 0
+	clients_coordinates, depots = mdvrptw.coordinates, mdvrptw.depots
 
+	index = 0
 	for clustered_depot in clustered_clients:
 		depot = depots[index]
 		color = colors[index]
 		index +=1
 
-		for c in range(1, len(clustered_depot)):
-			client = clustered_depot[c]
+		for ci in range(1, len(clustered_depot)):
+			client = clustered_depot[ci]
 			x,y = clients_coordinates[client]
 			#plt.plot(x,y, 'o', color=color, marker=".", markersize=8);
 			xplot = (x, depot.x)
@@ -43,6 +65,7 @@ def plot_clusterization_with_line(clustered_clients, clients_coordinates, depots
 
 		plt.plot(depot.x,depot.y, color=color, marker="s", markersize=10);
 
+	#plt.savefig('urgencies.png', bbox_inches='tight')
 	plt.show()
 
 def plot_mdvrptw_solution(mdvrptw_solution):
