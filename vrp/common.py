@@ -222,3 +222,15 @@ def is_feasible_by_time_windows(route, vrptw, i=0, bi=0):
         ci,bi = cj,bj # change python maybe? :v
 
     return True
+
+
+def get_client_id_vrptw(ci, cluster):
+    for ci_vrptw, ci_mdvrptw in enumerate(cluster):
+        if ci == ci_mdvrptw:
+            return ci_vrptw
+
+    return None
+
+def convert_route_to_vrptw(route, cluster):
+    for i in range(len(route)):
+        route[i]  = get_client_id_vrptw(route[i], cluster)
