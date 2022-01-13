@@ -1,13 +1,16 @@
 {
     "settings": "ACO_SETTINGS",
     "localSearch" : "LS",
-    "m" : 10,
-    "ro" : 0.5,
-    "alpha" : 0.5,
-    "beta" : 0.5,
-    "max_iterations" : 100,
-    "tau0" : 0.01,
+    "m" : 20,
+    "ro" : 0.05,
+    "alpha" : 1,
+    "beta" : 1,
+    "max_iterations" : 10,
+    "tau0" : 0.5,
     "Q": 1,
+    "q0": 0.9,
+    "a1": 0.1,
+    "a2": 0.9,
 
     "comment" : "localSearch in [LS, VND]"
 }
