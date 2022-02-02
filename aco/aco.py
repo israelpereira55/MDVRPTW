@@ -17,6 +17,8 @@ class ACO:
     alpha : float   # if alpha = 0, the pheromones are not considered
     beta  : float   # importance of heuristic function (fitness value)
     tau0  : float   # initial value for pheromones
+    a1 : float
+    a2 : float
 
     number_of_vertices : int
 
@@ -30,6 +32,9 @@ class ACO:
         self.tau0 = aco_settings.tau0
         self.max_iterations = aco_settings.max_iterations
         self.number_of_vertices = number_of_vertices
+
+        self.a1 = aco_settings.a1
+        self.a2 = aco_settings.a2
 
         self.ants = []
         self.best_ant = None
@@ -72,17 +77,22 @@ class ACO:
 
     # The aco_probabilities is a list with ci, bi, pij, where pij is the ACO probability.
     # The first and last item has a fake client -1, but a probability 0 or 100%.
-    def _get_probabilities(self, ci_mdvrptw, viable_clients, mdvrptw):
+    def _get_probabilities(self, ci_mdvrptw, bi, viable_clients, mdvrptw):
         aco_probabilities = []
         denominator = 0
         for cl_mdvrptw, bl in viable_clients:
+            #nil = 1/(self.a1*mdvrptw.distances[ci_mdvrptw][cl_mdvrptw] + self.a2*(bl-bi))
+            #nil = 1/(self.a1*mdvrptw.distances[ci_mdvrptw][cl_mdvrptw] + self.a2*(bl))
             nil = 1/mdvrptw.distances[ci_mdvrptw][cl_mdvrptw]
+
             denominator += math.pow(self.pheromones[ci_mdvrptw][cl_mdvrptw], self.alpha) * math.pow(nil, self.beta)
             if denominator == 0:
                 print('pheromones zero')
                 exit(1)
 
         for cj_mdvrptw, bj in viable_clients:
+            #nij = 1/(self.a1*mdvrptw.distances[ci_mdvrptw][cj_mdvrptw] + self.a2*(bj-bi))
+            #nij = 1/(self.a1*mdvrptw.distances[ci_mdvrptw][cj_mdvrptw] + self.a2*(bj))
             nij = 1/mdvrptw.distances[ci_mdvrptw][cj_mdvrptw]
             pij = math.pow(self.pheromones[ci_mdvrptw][cj_mdvrptw], self.alpha) * math.pow(nij, self.beta) / denominator
 
@@ -97,7 +107,7 @@ class ACO:
         pbase = 0.
         for i in range(len(aco_probabilities) -1):
             cj_mdvrptw, bj, pij = aco_probabilities[i]
-            if p >= pbase and p <= pij:
+            if p <= pij:
                 return cj_mdvrptw, bj
 
             pbase += pij
@@ -131,7 +141,7 @@ class ACO:
             
             viable_clients = self._get_viable_clients_vrptw(ci_mdvrptw, bi, route_demand, visited_clients, mdvrptw, depot, cluster)
             if len(viable_clients) > 0:
-                aco_probabilities = self._get_probabilities(ci_mdvrptw, viable_clients, mdvrptw)
+                aco_probabilities = self._get_probabilities(ci_mdvrptw, bi, viable_clients, mdvrptw)
                 cj_mdvrptw,bj = self._select_next_city(aco_probabilities)
                 route.append(cj_mdvrptw)
                 bi = bj
@@ -151,7 +161,7 @@ class ACO:
                 route_demand = 0
 
                 viable_clients = self._get_viable_clients_vrptw(ci_mdvrptw, bi, route_demand, visited_clients, mdvrptw, depot, cluster)
-                aco_probabilities = self._get_probabilities(ci_mdvrptw, viable_clients, mdvrptw)
+                aco_probabilities = self._get_probabilities(ci_mdvrptw, bi, viable_clients, mdvrptw)
                 cj_mdvrptw,bj = self._select_next_city(aco_probabilities)
                 route.append(cj_mdvrptw)
 
@@ -192,18 +202,20 @@ class ACO:
                     self.pheromones[ci][cj] = (1-self.ro) * self.pheromones[ci][cj] + self.ro/distance
 
 
-    def _ACS_get_probabilities(self, ci_mdvrptw, viable_clients, mdvrptw):
+    def _ACS_get_probabilities(self, ci_mdvrptw, bi, viable_clients, mdvrptw):
         aco_probabilities = []
         denominator = 0
         for cl_mdvrptw, bl in viable_clients:
-            nil = 1/mdvrptw.distances[ci_mdvrptw][cl_mdvrptw]
+            #nil = 1/(self.a1*mdvrptw.distances[ci_mdvrptw][cl_mdvrptw] + self.a2*(bl-bi))
+            nil = 1/self.a1*mdvrptw.distances[ci_mdvrptw][cl_mdvrptw]
             denominator += self.pheromones[ci_mdvrptw][cl_mdvrptw] * math.pow(nil, self.beta)
             if denominator == 0:
                 print('pheromones zero')
                 exit(1)
 
         for cj_mdvrptw, bj in viable_clients:
-            nij = 1/mdvrptw.distances[ci_mdvrptw][cj_mdvrptw]
+            #nij = 1/(self.a1*mdvrptw.distances[ci_mdvrptw][cj_mdvrptw] + self.a2*(bj-bi))
+            nij = 1/self.a1*mdvrptw.distances[ci_mdvrptw][cj_mdvrptw]
             pij = self.pheromones[ci_mdvrptw][cj_mdvrptw] * math.pow(nij, self.beta) / denominator
 
             aco_probabilities.append((cj_mdvrptw,bj,pij))
@@ -252,7 +264,7 @@ class ACO:
                     cj_mdvrptw = self.ACS_get_arg_max(ci_mdvrptw, viable_clients, mdvrptw)
                     bj = common.calculate_starting_time_mdvrptw(mdvrptw, ci_mdvrptw, bi, cj_mdvrptw)
                 else:
-                    aco_probabilities = self._ACS_get_probabilities(ci_mdvrptw, viable_clients, mdvrptw)
+                    aco_probabilities = self._ACS_get_probabilities(ci_mdvrptw, bi, viable_clients, mdvrptw)
                     cj_mdvrptw,bj = self._select_next_city(aco_probabilities)
                     
                 route.append(cj_mdvrptw)
@@ -274,7 +286,7 @@ class ACO:
                     cj_mdvrptw = self.ACS_get_arg_max(ci_mdvrptw, viable_clients, mdvrptw)
                     bj = common.calculate_starting_time_mdvrptw(mdvrptw, ci_mdvrptw, bi, cj_mdvrptw)
                 else:
-                    aco_probabilities = self._ACS_get_probabilities(ci_mdvrptw, viable_clients, mdvrptw)
+                    aco_probabilities = self._ACS_get_probabilities(ci_mdvrptw, bi, viable_clients, mdvrptw)
                     cj_mdvrptw,bj = self._select_next_city(aco_probabilities)
 
                 #aco_probabilities = self._get_probabilities(ci_mdvrptw, viable_clients, mdvrptw)
@@ -303,8 +315,8 @@ class ACO:
             while not vrptw_solution.is_feasible(depot=mdvrptw_solution.mdvrptw.depots[index]):
                 self.dissolve_pheromones_infeasible_vrptw(vrptw_solution, cluster=mdvrptw_solution.clustered_clients[index])
                 vrptw_solution = self.AS_construct_ant_vrptw(mdvrptw, vrptw_subproblem, mdvrptw_solution.clustered_clients[index], problem_index=index)
-                #print('infeasible vrptw')
-                #print(self.pheromones)
+                print('infeasible vrptw')
+                print(self.pheromones)
 
 
             #print("feasible vrptw!")
