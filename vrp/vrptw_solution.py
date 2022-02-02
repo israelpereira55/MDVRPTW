@@ -39,6 +39,8 @@ class VRPTW_Solution:
         self.free_capacities[route_index] -= self.vrptw.demands[ci]
 
         c_i_less1, c_i_plus1 = self.routes[route_index][u-1], self.routes[route_index][u+1]
+        ccost = self.travel_distance
+
         self.travel_distance = self.travel_distance \
            + vrptw.distances[c_i_less1][ci] + vrptw.distances[c_i_plus1][ci] \
            - vrptw.distances[c_i_less1][c_i_plus1]
@@ -274,3 +276,28 @@ class VRPTW_Solution:
                 return False
 
         return True
+
+    def is_feasible_by_demand(self, depot):
+        for route in self.routes:
+            sum_demands = 0
+            for ci in route:
+                sum_demands += self.vrptw.demands[ci]
+            if sum_demands > depot.vehicle_capacity:
+                print("Infeasible route:", route)
+                print(sum_demands, depot.vehicle_capacity)
+                return False
+
+        return True
+
+    def check_demand(self):
+        depot = self.vrptw.depot
+
+        for i, route in enumerate(self.routes):
+            sum_demands = 0
+            for ci in route:
+                sum_demands += self.vrptw.demands[ci]
+
+            free_capacities = depot.vehicle_capacity - sum_demands
+            if free_capacities != self.free_capacities[i]:
+                print("wrong free capacities")
+                exit(1)

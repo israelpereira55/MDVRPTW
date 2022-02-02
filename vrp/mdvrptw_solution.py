@@ -2,7 +2,7 @@ import math
 import numpy as np
 from copy import deepcopy
 
-from vrp import VRPTW, solomon
+from vrp import VRPTW, solomon, common
 
 class MDVRPTW_Solution:   
     #mdvrptw
@@ -133,6 +133,19 @@ class MDVRPTW_Solution:
                 return False
         return True
 
+    def is_feasible_by_time_windows(self):
+        for vrptw_solution in self.vrptw_solutions:
+            for route in vrptw_solution.routes:
+                if not common.is_feasible_by_time_windows(route, vrptw_solution.vrptw):
+                    return False
+        return True
+
+    def is_feasible_by_demand(self):
+        for vrptw_solution in self.vrptw_solutions:
+            if not vrptw_solution.is_feasible_by_demand(vrptw_solution.vrptw.depot):
+                return False
+        return True
+
     def check_clients_solution(self):
         clients = np.zeros((self.mdvrptw.number_of_clients+1))
         n = 0
@@ -157,13 +170,19 @@ class MDVRPTW_Solution:
             print("Missing client.")
             exit(1)
 
+    def check_demand(self):
+        for vrptw_solution in self.vrptw_solutions:
+            vrptw_solution.check_demand()
 
-    def get_client_id_vrptw(self, depot_index, ci_mdvrptw):
+
+    def get_client_id_vrptw(self, depot_index, ci_mdvrptw): #TODO REMOVE N USE ON COMMON
         for i, ci_vrptw in enumerate(self.clustered_clients[depot_index]):
             if ci_vrptw == ci_mdvrptw:
                 return i
 
-        return False
+        return None
 
     def get_client_id_mdvrptw(self, depot_index, ci_vrptw):
         return self.clustered_clients[depot_index][ci_vrptw]
+
+
