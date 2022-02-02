@@ -382,7 +382,10 @@ def drop_one_point_intra_depot_vrptw(vrptw_solution):
 
     best_pj = -1,-1
     got_improvement = False
-    for routei_index in range(len(vrptw_solution.routes)): 
+
+    routei_index = 0
+    while routei_index < len(vrptw_solution.routes):
+    #for routei_index in range(len(vrptw_solution.routes)): 
     #for routei_index,routei in enumerate(vrptw_solution.routes): 
         cost = vrptw_solution.travel_distance
         routei = vrptw_solution.routes[routei_index] #enumerate nao é tao bom pq tem q atualizar
@@ -420,19 +423,22 @@ def drop_one_point_intra_depot_vrptw(vrptw_solution):
                         best_pj = routej_index, j
                         got_improvement = True
 
-
             if got_improvement:
                 best_route_index, best_index = best_pj
                 vrptw_solution.remove_client(i, routei_index)
+
                 if len(vrptw_solution.routes[routei_index]) == 2:
                     vrptw_solution.routes.pop(routei_index)
+                    vrptw_solution.free_capacities.pop(routei_index)
+                    if best_route_index >= routei_index: 
+                        best_route_index -= 1
 
                 vrptw_solution.insert_client(ci, best_index, best_route_index)
                 got_improvement = False
 
             i+=1
             #print('-')
-
+        routei_index += 1
 
 def drop_one_point_intra_depot_mdvrptw(mdvrptw_solution):
     for vrptw_solution in mdvrptw_solution.vrptw_solutions:
@@ -506,8 +512,7 @@ def dop_inter_depot_check_insertion_improvement(mdvrptw_solution, ci, ci_current
                 best_pj = route_index, j
                 got_improvement = True
 
-
-    if mdvrptw_new_cost < mdvrptw_cost:
+    if got_improvement:
         return True, mdvrptw_new_cost, best_pj[0], best_pj[1]
 
     return False, False, False, False
@@ -541,7 +546,7 @@ def drop_one_point_next_depot_mdvrptw(mdvrptw_solution):
     for ci in range(1, mdvrptw.number_of_clients +1):
         lowest_index = -1
         lowest_distance = float('inf')
-        for di in range(mdvrptw.number_of_clients +1, mdvrptw.number_of_clients + mdvrptw.number_of_depots):
+        for di in range(mdvrptw.number_of_clients +1, mdvrptw.number_of_clients + mdvrptw.number_of_depots +1):
             #We want to find the closest depot which the client is not already routed.
             #So, we are skipping the client current depot
             if di == clients_current_depot[ci]:
@@ -587,12 +592,13 @@ def drop_one_point_next_depot_mdvrptw(mdvrptw_solution):
             mdvrptw_solution.clustered_clients[current_depot_index].pop(ci_vrptw)
             if len(mdvrptw_solution.vrptw_solutions[current_depot_index].routes[pi[0]]) == 2:
                 mdvrptw_solution.vrptw_solutions[current_depot_index].routes.pop(pi[0])
+                mdvrptw_solution.vrptw_solutions[current_depot_index].free_capacities.pop(pi[0])
+
 
             ci_vrptw = len(mdvrptw_solution.clustered_clients[closest_depot_index])
             mdvrptw_solution.vrptw_solutions[closest_depot_index].add_client_to_problem(
                                 ci, ci_vrptw, mdvrptw.coordinates[ci], mdvrptw.time_windows[ci], mdvrptw.services[ci], mdvrptw.demands[ci], route_index, index)
             mdvrptw_solution.clustered_clients[closest_depot_index].insert(ci_vrptw, ci)
-
 
 
 # 2opt-intra
@@ -727,12 +733,11 @@ def local_search(mdvrptw_solution):
 
 
 def vnd(mdvrptw_solution):
-
     got_improvement = True
     while got_improvement:
         got_improvement= False
         cost = mdvrptw_solution.get_travel_distance()
-
+        
         while True:
             two_swap_mdvrptw_best_improvement(mdvrptw_solution)
             if round(mdvrptw_solution.get_travel_distance(),8) < round(cost,8):
@@ -748,7 +753,7 @@ def vnd(mdvrptw_solution):
             if round(mdvrptw_solution.get_travel_distance(),8) < round(cost,8):
                 got_improvement= True
                 break
-            
+
             drop_one_point_intra_depot_mdvrptw(mdvrptw_solution)
             if round(mdvrptw_solution.get_travel_distance(),8) < round(cost,8):
                 got_improvement= True
