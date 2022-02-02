@@ -30,8 +30,15 @@ class MDVRPTW:
     number_of_depots : int
 
 
-    def __init__(self, instance_file):
-        self.read_instance(instance_file)
+    def __init__(self, instance_file, MDVRP=False):
+        if MDVRP:
+            self.read_instance_mdvrp(instance_file)
+
+            for i in range(len(self.time_windows)):
+                self.time_windows[i][1] = 10000
+        else:
+            self.read_instance(instance_file)
+        
 
 
     def read_instance(self, instance_file):
@@ -103,6 +110,84 @@ class MDVRPTW:
             depot = self.depots[depot_index]
             depot.customer_id = depot_customer_id
             depot.x, depot.y = x,y
+            depot.service_time, depot.ready_time, depot.due_date = service, ready_time, due_date
+
+            self.coordinates[depot_customer_id] = x,y
+            depot_index += 1
+
+        self.travel_times = self.distances = geometry.distances.calculate_distance_matrix(self.coordinates)
+
+    def read_instance_mdvrp(self, instance_file):
+        try:
+            file = open(instance_file)
+            lines =  file.readlines()
+            file.close()
+        except IOError:
+            print("[ERROR]: Could not open the {} file.".format(instance_file))
+            exit(1)
+
+
+        self.problem_type, self.number_of_vehicles, self.number_of_clients, self.number_of_depots = (int(x) for x in lines[0].split())
+        if self.problem_type != 2:
+            print("[ERROR] The instance file isn't for MDVRPTW.\nAborting...")
+            exit(1)
+
+        vertices_number = self.number_of_clients + self.number_of_depots
+
+        self.coordinates = np.zeros((vertices_number +1 ,2))
+        self.time_windows = np.zeros((self.number_of_clients +1,2))
+        self.services = np.zeros((self.number_of_clients +1))
+        self.demands = np.zeros((self.number_of_clients +1))
+        self.depots = [None] * self.number_of_depots
+
+
+        # Depots
+        for i in range(self.number_of_depots):
+            route_max_time, vehicle_max_load = (float(x) for x in lines[1+i].split())
+            depot = Depot(index=i, route_max_time=route_max_time, vehicle_capacity=vehicle_max_load, number_of_vehicles=self.number_of_vehicles)
+            self.depots[i] = depot
+
+        # Clients
+        for i in range(self.number_of_clients):
+            line = lines[1 + self.number_of_depots + i]
+            splited_line = line.split()
+
+            #client_id, x, y, service, demand, frequency_of_visit, list_possible_visits, ready_time, due_date  = [int(x) for x in line.split()]
+            client_id, x, y, service, demand, frequency_of_visit, number_of_possible_visits = int(splited_line[0]), float(splited_line[1]), float(splited_line[2]), float(splited_line[3]), float(splited_line[4]), float(splited_line[5]), int(splited_line[6])
+            if frequency_of_visit != 1:
+                print("[ERROR] Frequency of visit is not 1. Please check.\nAborting...")
+                exit(1)
+            #for j in range(number_of_possible_visits):
+                #ignore
+            
+            #ready_time, due_date = float(splited_line[7 + number_of_possible_visits]), float(splited_line[8 + number_of_possible_visits])
+            ready_time, due_date = 0, 5000
+
+            self.coordinates[client_id] = x,y
+            self.time_windows[client_id] = ready_time, due_date
+            self.services[client_id] = service
+            self.demands[client_id] = demand
+
+
+        depot_index = 0
+        start = 1+ self.number_of_depots +self.number_of_clients
+        for i in range(start, start+self.number_of_depots):
+            line = lines[i]
+            splited_line = line.split()
+            depot_customer_id, x, y, service, demand, frequency_of_visit, number_of_possible_visits= int(splited_line[0]), float(splited_line[1]), float(splited_line[2]), float(splited_line[3]), float(splited_line[4]), float(splited_line[5]), int(splited_line[6])
+
+            if frequency_of_visit != 0 or number_of_possible_visits != 0:
+                print("[ERROR] Wrong depot specification. Please check.\nAborting...")
+                exit(1)
+
+            if demand != 0:
+                print("[ERROR] Depot has a demand. Please check.\nAborting...")
+                exit(1)
+
+            depot = self.depots[depot_index]
+            depot.customer_id = depot_customer_id
+            depot.x, depot.y = x,y
+            ready_time, due_date = 0,5000
             depot.service_time, depot.ready_time, depot.due_date = service, ready_time, due_date
 
             self.coordinates[depot_customer_id] = x,y
