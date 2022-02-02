@@ -9,8 +9,8 @@
     "tau0" : 0.5,
     "Q": 1,
     "q0": 0.9,
-    "a1": 0.1,
-    "a2": 0.9,
+    "a1": 0.4,
+    "a2": 0.6,
 
     "comment" : "localSearch in [LS, VND]"
 }

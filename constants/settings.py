@@ -10,4 +10,5 @@ class Settings:
     ACO_AS = 21
     ACO_ACS = 22
     GRASP = 23
-    IPGRASP = 24
+    GRASP_REACTIVE = 24
+    IPGRASP = 25

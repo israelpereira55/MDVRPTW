@@ -9,6 +9,8 @@ class SoftwareSettings:
       return Settings.ACO_ACS
     elif solve_method == 'GRASP':
       return Settings.GRASP
+    elif solve_method == 'GRASP_REACTIVE':
+      return Settings.GRASP_REACTIVE
     else:
       return Settings.IPGRASP
 
@@ -33,6 +35,8 @@ class SoftwareSettings:
       solve_method_string = 'ACO_ACS'
     elif self.solve_method == Settings.GRASP:
       solve_method_string = 'GRASP'
+    elif self.solve_method == Settings.GRASP_REACTIVE:
+      solve_method_string = 'GRASP_REACTIVE'
     else:
       solve_method_string = 'IPGRASP'
 
@@ -70,6 +74,7 @@ class GRASPSettings:
             "Parameters\n" 
             f"  alpha: {self.alpha}\n" 
             f"  max_iterations: {self.max_iterations}\n" 
+            f"  max_attempts: {self.number_of_attempts}\n"
             f"  local search: {local_search_string}\n" 
             "=========================================\n")
 

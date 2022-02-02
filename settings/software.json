@@ -4,5 +4,5 @@
     "clusterMethod" : "KMeans",
     "seed" : 1,
 
-    "comment" : "solveMethod in [GRASP, ACO_AS, ACO_ACS, IPGRASP]; clusterMethod in [KMeans, Urgencies, Other]"
+    "comment" : "solveMethod in [GRASP, GRASP_REACTIVE, IPGRASP, ACO_AS, ACO_ACS]; clusterMethod in [KMeans, Urgencies, Other]"
 }
