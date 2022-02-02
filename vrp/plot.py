@@ -104,5 +104,5 @@ def plot_mdvrptw_solution(mdvrptw_solution):
 		x,y = mdvrptw.coordinates[i]
 		plt.text(x,y , str(i), color='black', fontsize=12);
 
-
-	plt.show()
+	plt.savefig('solution.png', bbox_inches='tight')
+	#plt.show()
