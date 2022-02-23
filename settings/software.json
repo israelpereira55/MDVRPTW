@@ -1,8 +1,8 @@
 {
     "settings": "MDVRPTW_SOLVER",
-    "solveMethod" : "GRASP",
-    "clusterMethod" : "KMeans",
+    "solveMethod" : "GRASP_REACTIVE",
+    "clusterMethod" : "Urgencies",
     "seed" : 1,
 
-    "comment" : "solveMethod in [GRASP, GRASP_REACTIVE, IPGRASP, ACO_AS, ACO_ACS]; clusterMethod in [KMeans, Urgencies, Other]"
+    "comment" : "solveMethod in [GRASP, GRASP_REACTIVE, IPGRASP, ACO_AS, ACO_ACS, RANDOM_VND]; clusterMethod in [KMeans, Urgencies, Other]"
 }

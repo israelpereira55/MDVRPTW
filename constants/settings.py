@@ -12,3 +12,4 @@ class Settings:
     GRASP = 23
     GRASP_REACTIVE = 24
     IPGRASP = 25
+    RANDOM_VND = 26
