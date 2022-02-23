@@ -11,6 +11,8 @@ class SoftwareSettings:
       return Settings.GRASP
     elif solve_method == 'GRASP_REACTIVE':
       return Settings.GRASP_REACTIVE
+    elif solve_method == 'RANDOM_VND':
+      return Settings.RANDOM_VND
     else:
       return Settings.IPGRASP
 
@@ -37,6 +39,8 @@ class SoftwareSettings:
       solve_method_string = 'GRASP'
     elif self.solve_method == Settings.GRASP_REACTIVE:
       solve_method_string = 'GRASP_REACTIVE'
+    elif self.solve_method == Settings.RANDOM_VND:
+      solve_method_string = 'RANDOM_VND'
     else:
       solve_method_string = 'IPGRASP'
 
