@@ -6,6 +6,7 @@ import numpy as np
 
 from vrp import common
 import geometry
+import random
 
 class VRPTW_Solution:
     #vrptw                     # The VRPTW problem instance.
@@ -22,6 +23,51 @@ class VRPTW_Solution:
         self.routes = []
         self.free_capacities = []
         self.number_of_vertices = vrptw.number_of_clients +1
+
+    #Not necessarily viable by number of vehicles.
+    def create_random_mdvrp_solution(self):
+        self.routes = []
+        self.free_capacities = []
+
+        vrptw = self.vrptw
+        number_of_clients = self.number_of_vertices -1
+        possible_clients = [0] *number_of_clients
+        for i in range(1, number_of_clients+1):
+            possible_clients[i-1] = i
+
+        route = [0]
+        route_demand = 0
+
+        leftover_clients = []
+        number_of_routed_clients = 0
+
+        while number_of_routed_clients < number_of_clients:
+            r = random.randint(0, len(possible_clients)-1)
+            client = possible_clients[r]
+            route_demand += vrptw.demands[client]
+            
+            if route_demand > self.vrptw.vehicle_capacity:
+                leftover_clients.append(client)
+                route_demand -= vrptw.demands[client]
+            else:
+                route.append(client)
+                number_of_routed_clients += 1
+
+
+            possible_clients.pop(r)
+            # If there is no possible clients, then route is completed
+            if len(possible_clients) == 0:
+                route.append(0)
+                self.routes.append(route)
+                self.free_capacities.append(self.vrptw.vehicle_capacity - route_demand)
+
+                route = [0]
+                route_demand = 0
+                possible_clients = leftover_clients
+                leftover_clients = []
+
+        self.travel_distance = self.calculate_cost()
+
 
     def insert_route(self, route):
         self.routes.append(route)

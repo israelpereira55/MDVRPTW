@@ -1,8 +1,9 @@
 import math
 import numpy as np
 from copy import deepcopy
+import random
 
-from vrp import VRPTW, solomon, common
+from vrp import VRPTW, VRPTW_Solution, solomon, common
 
 class MDVRPTW_Solution:   
     #mdvrptw
@@ -24,13 +25,35 @@ class MDVRPTW_Solution:
         self.mdvrptw = mdvrptw
 
 
-    def construct_solution_with_solomon(self, alpha1, alpha2, mu, lambdaa):
+    def construct_solution_with_solomon(self, solomon_settings):
         vrptw_solutions = []
         for vrptw_subproblem in self.vrptw_subproblems:
-            vrptw_solution = solomon.insertion_heuristic(vrptw_subproblem, alpha1, alpha2, mu, lambdaa)
+            vrptw_solution = solomon.insertion_heuristic(vrptw_subproblem, solomon_settings)
             vrptw_solutions.append(vrptw_solution)
 
         self.vrptw_solutions = vrptw_solutions
+
+
+    def create_random_mdvrp_solution(self):
+
+        #for i, cluster in enumerate(self.clustered_clients):
+
+        for vrptw in self.vrptw_subproblems:
+            #vrptw = self.vrptw_subproblems[i]
+            vrptw_solution = VRPTW_Solution(vrptw)
+            vrptw_solution.create_random_mdvrp_solution()
+
+            failed_attempts = 0
+            while len(vrptw_solution.routes) > vrptw.number_of_vehicles:
+                failed_attempts += 1
+                if failed_attempts == 10:
+                    print("Could not make a feasible solution. Aborting...")
+                    exit(1)
+
+                vrptw_solution.create_random_mdvrp_solution()
+
+            self.vrptw_solutions.append(vrptw_solution)
+
 
     #def check_viability(self):
     #    if 
