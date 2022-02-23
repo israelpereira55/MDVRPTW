@@ -199,7 +199,7 @@ def insertion_heuristic(vrptw, solomon_settings):
     vrptw_solution = VRPTW_Solution(vrptw)
     route_index = 0
 
-    alpha1, alpha2, mu, lambdaa = solomon_settings.alpha1, solomon_settings.alpha2, solomon_settings.mu, solomon_settings.lamdaa
+    alpha1, alpha2, mu, lambdaa = solomon_settings.alpha1, solomon_settings.alpha2, solomon_settings.mu, solomon_settings.lambdaa
     init_criteria = solomon_settings.init_criteria
     
     #Do while, I miss you </3
