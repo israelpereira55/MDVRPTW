@@ -14,6 +14,7 @@ def construct_solution_with_solomon(mdvrptw, clustered_clients, grasp_settings, 
     mdvrptw_best_solution = None
     cost = float('inf')
 
+    sum_solutions = 0
     failed_attempts=0
     if print_progress: time_start = time.time()
 
@@ -34,6 +35,7 @@ def construct_solution_with_solomon(mdvrptw, clustered_clients, grasp_settings, 
             local_search.local_search(mdvrptw_solution)
 
         new_cost = mdvrptw_solution.get_travel_distance()
+        sum_solutions += new_cost
         if new_cost < cost:
             mdvrptw_best_solution = mdvrptw_solution
             cost = new_cost
@@ -41,7 +43,9 @@ def construct_solution_with_solomon(mdvrptw, clustered_clients, grasp_settings, 
                 time_end = time.time()
                 print(f"[GRASP]: Improved solution {round(cost,2)} (iteration={i}, time={round(time_end-time_start,2)})")
 
-    if print_progress: print(f'[GRASP]: Number of infeasible generated solutions={failed_attempts}.')
+    if print_progress: print(f'\n[GRASP]: Number of infeasible generated solutions={failed_attempts}.')
+    if print_progress: print(f'[GRASP]: Average cost of solutions={round(sum_solutions/grasp_settings.max_iterations, 2)}.')
+
     return mdvrptw_best_solution
 
 
@@ -150,6 +154,9 @@ def reactive_grasp(mdvrptw, clustered_clients, grasp_settings, solomon_settings)
     solutions, best_solution = initial_population(mdvrptw, clustered_clients, grasp_settings, solomon_settings)
     grasp_settings.max_iterations = max_iterations
     best_cost = best_solution.get_travel_distance()
+    time_end = time.time()
+    print(f"[REACTIVE GRASP]: Improved solution {round(best_cost,2)} (iteration={0}, time={round(time_end-time_start,2)})")
+
 
     for i in range(len(probabilities)):
         values_sum[i] = solutions[i].get_travel_distance()
@@ -159,6 +166,7 @@ def reactive_grasp(mdvrptw, clustered_clients, grasp_settings, solomon_settings)
 
     it = 0
     failed_attempts = 0
+    sum_solutions = 0
     while it < grasp_settings.max_iterations:
         for i in range(100):
             alpha, alpha_index = reactive_grasp_select_alpha(alphas, probabilities)
@@ -181,6 +189,7 @@ def reactive_grasp(mdvrptw, clustered_clients, grasp_settings, solomon_settings)
             values_sum[alpha_index] += mdvrptw_solution.get_travel_distance()
 
             new_cost = mdvrptw_solution.get_travel_distance()
+            sum_solutions += new_cost
             if new_cost < best_cost:
                 best_solution = mdvrptw_solution
                 best_cost = new_cost
@@ -194,6 +203,8 @@ def reactive_grasp(mdvrptw, clustered_clients, grasp_settings, solomon_settings)
         reactive_grasp_update_probabilities(probabilities, values_sum, number_of_solutions, best_cost, gamma)
         it += 100
 
-    print(f'[REACTIVE GRASP]: Number of infeasible generated solutions={failed_attempts}.')
+    print(f'\n[REACTIVE GRASP]: Number of infeasible generated solutions={failed_attempts}.')
+    print(f'[REACTIVE GRASP]: Average cost of solutions={round(sum_solutions/it, 2)}.')
+
     return best_solution
 
