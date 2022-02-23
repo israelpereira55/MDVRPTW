@@ -27,10 +27,10 @@ def main(argv):
         print("Please describe the MDVRPTW instace file.\nAborting...")
         exit(1)
 
-    software = SoftwareSettings('./settings/software.json')
-    grasp_settings = GRASPSettings('./settings/grasp.json')
-    aco_settings = ACOSettings('./settings/aco.json')
-    solomon_settings = SolomonSettings('./settings/solomon.json')
+    software = SoftwareSettings('./settings/software.json', print_settings=True)
+    grasp_settings = GRASPSettings('./settings/grasp.json', print_settings=True)
+    aco_settings = ACOSettings('./settings/aco.json', print_settings=True)
+    solomon_settings = SolomonSettings('./settings/solomon.json', print_settings=True)
     
     #mdvrptw.print_instance()
     random.seed(software.seed)
@@ -55,21 +55,21 @@ def main(argv):
     #plot.plot_instance(mdvrptw, plot_ids=False)
     #plot.plot_clusterization(clustered_clients, mdvrptw.coordinates, mdvrptw.depots)
     #plot.plot_clusterization_with_line(mdvrptw, clustered_clients)
-    #exit(1)
+    #plt.savefig('instance-mdvrp.png', bbox_inches='tight')
     # =====================================================
-    mdvrptw.print_instance()
+    #mdvrptw.print_instance()
+    best_solution = None
+
+    #mdvrptw_solution = MDVRPTW_Solution(mdvrptw, clustered_clients)
+    #mdvrptw_solution.construct_solution_with_solomon(solomon_settings)
+    #print("Construtive", mdvrptw_solution.get_travel_distance())
 
     #SOLUTION METHOD
     if software.solve_method == Settings.GRASP:
         best_solution = grasp.construct_solution_with_solomon(mdvrptw, clustered_clients, grasp_settings, solomon_settings, print_progress=True)
-        best_solution.print_solution()
-        plot.plot_mdvrptw_solution(best_solution)
-
 
     elif software.solve_method == Settings.GRASP_REACTIVE:
         best_solution = grasp.reactive_grasp(mdvrptw, clustered_clients, grasp_settings, solomon_settings)
-        best_solution.print_solution()
-        plot.plot_mdvrptw_solution(best_solution)
 
 
     elif software.solve_method == Settings.ACO_AS:
@@ -80,7 +80,6 @@ def main(argv):
         aco.run_AS(mdvrptw, clustered_clients, print_progress=True)
         best_solution = aco.best_ant.mdvrptw_solution
 
-
     elif software.solve_method == Settings.ACO_ACS:
         number_of_vertices = mdvrptw.number_of_clients + mdvrptw.number_of_depots
         aco = ACO(number_of_vertices, aco_settings)
@@ -88,6 +87,30 @@ def main(argv):
         #aco.inject_initial_population(solutions)
         aco.run_ACS(mdvrptw, clustered_clients, print_progress=True)
         best_solution = aco.best_ant.mdvrptw_solution
+
+
+    elif software.solve_method == Settings.RANDOM_VND:
+        sum_solutions = 0
+        best_cost = float('inf')
+        time_start = time.time()
+
+        for i in range(10000):
+            mdvrptw_solution = MDVRPTW_Solution(mdvrptw, clustered_clients)
+            mdvrptw_solution.create_random_mdvrp_solution()
+            local_search.vnd(mdvrptw_solution)
+
+            cost = mdvrptw_solution.get_travel_distance()
+            sum_solutions += cost
+            if cost < best_cost:
+                best_cost = cost
+                best_solution = mdvrptw_solution
+                time_end = time.time()
+                print(f"[RANDOM VND]: Improved solution {round(best_cost,2)} (iteration {i} time {time_end - time_start})")
+
+
+            print("[RVND]", mdvrptw_solution.get_travel_distance(), 'iteration', i)
+
+        print(f'[RANDOM VND]: Average cost of solutions={round(sum_solutions/10000, 2)}.')
 
 
     else: #IPGRASP
@@ -107,6 +130,10 @@ def main(argv):
         print(f'[IPGRASP]: Best solution {best_cost} alpha {alpha}')
         print("Time avg:", (time_end - time_start)/aco_settings.m)
 
+
+
+    best_solution.print_solution()
+    plot.plot_mdvrptw_solution(best_solution)
 
     #Test Solution: TEMPORARY
     best_solution.check_clients_solution()
