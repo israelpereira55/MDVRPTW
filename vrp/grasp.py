@@ -78,12 +78,13 @@ def initial_population(mdvrptw, clustered_clients, grasp_settings, solomon_setti
         solution = construct_solution_with_solomon(mdvrptw, clustered_clients, grasp_settings, solomon_settings)
         solutions.append(solution)
 
-        cost = solution.get_travel_distance()
-        if cost < best_cost:
-            best_cost = cost
-            best_solution = solution
+        if solution != None:
+            cost = solution.get_travel_distance()
+            if cost < best_cost:
+                best_cost = cost
+                best_solution = solution
 
-        if print_progress: print("alpha", alpha, solutions[i].get_travel_distance())
+            if print_progress: print("alpha", alpha, solutions[i].get_travel_distance())
 
     grasp_settings.max_iterations = max_iterations
     grasp_settings.alpha = initial_alpha
@@ -175,7 +176,6 @@ def reactive_grasp(mdvrptw, clustered_clients, grasp_settings, solomon_settings,
     sum_solutions = 0
     failed_attempts = 0
     while it < grasp_settings.max_iterations:
-        print(it, grasp_settings.max_iterations)
         for i in range(100):
             alpha, alpha_index = reactive_grasp_select_alpha(alphas, probabilities)
 
