@@ -26,8 +26,9 @@ def construct_solution_with_solomon(mdvrptw, clustered_clients, grasp_settings, 
 
             failed_attempts += 1
             if failed_attempts > grasp_settings.number_of_attempts:
-                print(f"[GRASP]: Iteration={i}. Number of infeasible generated solutions surpassed the maximum allowed: {grasp_settings.number_of_attempts}. Aborting...")
-                exit(1)
+                if print_progress:
+                    print(f"[GRASP]: Iteration={i}. Number of infeasible generated solutions surpassed the maximum allowed: {grasp_settings.number_of_attempts}. Aborting...")
+                return None
 
         if grasp_settings.local_search == Settings.VND:
             local_search.vnd(mdvrptw_solution)
@@ -43,8 +44,9 @@ def construct_solution_with_solomon(mdvrptw, clustered_clients, grasp_settings, 
                 time_end = time.time()
                 print(f"[GRASP]: Improved solution {round(cost,2)} (iteration={i}, time={round(time_end-time_start,2)})")
 
-    if print_progress: print(f'\n[GRASP]: Number of infeasible generated solutions={failed_attempts}.')
-    if print_progress: print(f'[GRASP]: Average cost of solutions={round(sum_solutions/grasp_settings.max_iterations, 2)}.')
+    if print_progress: 
+        print(f'\n[GRASP]: Number of infeasible generated solutions={failed_attempts}.\n'
+              f'[GRASP]: Average cost of solutions={round(sum_solutions/grasp_settings.max_iterations, 2)}.')
 
     return mdvrptw_best_solution
 
@@ -64,9 +66,10 @@ def initial_population(mdvrptw, clustered_clients, grasp_settings, solomon_setti
     solutions = []
     m, base_alpha = grasp_settings.m, grasp_settings.base_alpha
     max_iterations = grasp_settings.max_iterations
-    grasp_settings.max_iterations=10
+    grasp_settings.max_iterations=1
 
     initial_alpha = grasp_settings.alpha
+    best_solution = None
     best_cost = float('inf')
     for i in range(m):
         alpha = base_alpha + (i/(m-1) * (1-base_alpha))
@@ -117,7 +120,6 @@ def reactive_grasp_select_alpha(alphas, probabilities):
     return alphas[-1], len(alphas) -1
     '''
 
-
 def reactive_grasp_update_probabilities(probabilities, values_sum, number_of_solutions, best_cost, gamma):
     m = len(probabilities)
 
@@ -132,8 +134,7 @@ def reactive_grasp_update_probabilities(probabilities, values_sum, number_of_sol
         qi = qis[i]
         probabilities[i] = qi/q_sum
 
-
-def reactive_grasp(mdvrptw, clustered_clients, grasp_settings, solomon_settings):
+def reactive_grasp(mdvrptw, clustered_clients, grasp_settings, solomon_settings, print_progress=False):
     time_start = time.time()
 
     alphas = []
@@ -145,40 +146,54 @@ def reactive_grasp(mdvrptw, clustered_clients, grasp_settings, solomon_settings)
         alphas.append(base_alpha + (i/(m-1) * (1-base_alpha)))
 
     probabilities = np.full((m), 1/m)
-    best_cost = float('inf')
-    values_sum = np.zeros((m)) # the average cost solutions for each alpha
+    values_sum = np.zeros((m)) # initializating the average cost solutions for each alpha
 
-    #Generating a solution for each alpha to select the initial values.
-    max_iterations = grasp_settings.max_iterations
-    grasp_settings.max_iterations = 1
+    # Fixing the Reactive GRASP absolute qualification rule.
+    # by generating one solution for each alpha to select the initial values. If its infeasible, the value solution will be None.
+    # and the cost will be used as a high value.
     solutions, best_solution = initial_population(mdvrptw, clustered_clients, grasp_settings, solomon_settings)
-    grasp_settings.max_iterations = max_iterations
+
+    if best_solution is None:
+        print("[REACTIVE GRASP]: Could not generate any feasible solution. Please check parameters. Aborting...\n")
+        exit(1)
+
     best_cost = best_solution.get_travel_distance()
     time_end = time.time()
-    print(f"[REACTIVE GRASP]: Improved solution {round(best_cost,2)} (iteration={0}, time={round(time_end-time_start,2)})")
 
+    if print_progress: print(f"[REACTIVE GRASP]: Improved solution {round(best_cost,2)} (iteration={0}, time={round(time_end-time_start,2)})")
 
     for i in range(len(probabilities)):
-        values_sum[i] = solutions[i].get_travel_distance()
+        if solutions[i] != None:
+            values_sum[i] = solutions[i].get_travel_distance()
+        else:
+            values_sum[i] = 100000 #TODO: make it to relationated to the instance value. Maybe get the worst cost and multiply by 10.
 
-    number_of_solutions = np.full((m), 1) #for each alpha, the number of solutions generated with that alpha
+    number_of_solutions = np.full((m), 1) #for each alpha, the number of solutions generated with that alpha. It started with 1 because the initial population.
     reactive_grasp_update_probabilities(probabilities, values_sum, number_of_solutions, best_cost, gamma)
 
     it = 0
-    failed_attempts = 0
     sum_solutions = 0
+    failed_attempts = 0
     while it < grasp_settings.max_iterations:
+        print(it, grasp_settings.max_iterations)
         for i in range(100):
             alpha, alpha_index = reactive_grasp_select_alpha(alphas, probabilities)
 
             mdvrptw_solution = grasp_mdvrptw(mdvrptw, clustered_clients, alpha, solomon_settings)
             while not mdvrptw_solution.is_feasible_by_number_of_vehicles():
+
+                # If the alpha selected was infeasible, it's probability will be reduced and a new alpha will be selected.
+                # However, when updating the probabilities, the probability will roll back to that value, so we will penalize the cost of that alpha.
+                probabilities[alpha_index] = probabilities[alpha_index]/2 
+                values_sum[alpha_index] += values_sum[alpha_index]/2
+
+                alpha, alpha_index = reactive_grasp_select_alpha(alphas, probabilities)
                 mdvrptw_solution = grasp_mdvrptw(mdvrptw, clustered_clients, alpha, solomon_settings)
 
                 failed_attempts += 1
                 if failed_attempts > grasp_settings.number_of_attempts:
-                    print(f"[GRASP]: Iteration={i}. Number of infeasible generated solutions surpassed the maximum allowed: {grasp_settings.number_of_attempts}. Aborting...")
-                    exit(1)
+                    print(f"[REACTIVE GRASP]: Iteration={i}. Number of infeasible generated solutions surpassed the maximum allowed: {grasp_settings.number_of_attempts}. Aborting...")
+                    return best_solution
 
             if grasp_settings.local_search == Settings.VND:
                 local_search.vnd(mdvrptw_solution)
@@ -190,12 +205,13 @@ def reactive_grasp(mdvrptw, clustered_clients, grasp_settings, solomon_settings)
 
             new_cost = mdvrptw_solution.get_travel_distance()
             sum_solutions += new_cost
+
             if new_cost < best_cost:
                 best_solution = mdvrptw_solution
                 best_cost = new_cost
 
                 time_end = time.time()
-                print(f"[REACTIVE GRASP]: Improved solution {round(best_cost,2)} (iteration={it+i}, alpha={round(alpha,3)}, time={round(time_end-time_start,2)})")
+                if print_progress: print(f"[REACTIVE GRASP]: Improved solution {round(best_cost,2)} (iteration={it+i}, alpha={round(alpha,3)}, time={round(time_end-time_start,2)})")
 
             #print("[RGRASP]", mdvrptw_solution.get_travel_distance(), 'iteration', it+i, 'alpha', round(alpha,3))
 
@@ -203,8 +219,11 @@ def reactive_grasp(mdvrptw, clustered_clients, grasp_settings, solomon_settings)
         reactive_grasp_update_probabilities(probabilities, values_sum, number_of_solutions, best_cost, gamma)
         it += 100
 
-    print(f'\n[REACTIVE GRASP]: Number of infeasible generated solutions={failed_attempts}.')
-    print(f'[REACTIVE GRASP]: Average cost of solutions={round(sum_solutions/it, 2)}.')
+    if print_progress:
+        print(f'\n[REACTIVE GRASP]: Number of infeasible generated solutions={failed_attempts}.\n'
+        f'[REACTIVE GRASP]: Average cost of solutions={round(sum_solutions/it, 2)}.\n'
+        f'[REACTIVE GRASP]: Best solution={round(best_solution.get_travel_distance(), 2)}.')
+
 
     return best_solution
 
