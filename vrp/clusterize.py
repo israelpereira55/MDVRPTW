@@ -269,3 +269,161 @@ def clusterize_by_urgencies(mdvrptw, show_test=False):
         exit(1)
 
     return clustered_clients
+
+
+
+# 3C clusterization
+def get_average_distance_client_to_cluster(mdvrptw, city, cluster):
+    distances = 0
+    for ci in cluster:
+        distances += mdvrptw.distances[city][ci]
+
+    return distances/(len(cluster)+1) #TODO VERIFICAR +1
+
+# 3C clusterization
+def get_two_closest_clusters(mdvrptw, city, clusters):
+    c0 = clusters[0][0]
+    cost = mdvrptw.distances[city][c0]
+    best_index = 0
+
+    for index in range(1, len(clusters)):
+        c0 = clusters[index][0]
+        new_cost = mdvrptw.distances[city][c0]
+        if new_cost < cost:
+            cost = new_cost
+            best_index = index
+
+    closest_cluster = best_index
+
+
+    if closest_cluster != 0:
+        c0 = clusters[0][0]
+        best_index = 0
+    else:
+        c0 = clusters[1][0]
+        best_index = 1
+
+    cost = mdvrptw.distances[city][c0]
+
+    for index in range(len(clusters)):
+        if index == closest_cluster or index == best_index:
+            continue
+
+        c0 = clusters[index][0]
+        new_cost = mdvrptw.distances[city][c0]
+        if new_cost < cost:
+            cost = new_cost
+            best_index = index
+
+    second_cluster = best_index
+    return closest_cluster, second_cluster #indexers
+
+#3C clusterization
+def get_variance_of_avg_distance(mdvrptw, client, cluster, avg_distance):
+    #avg_distance = get_average_distance_client_to_cluster(mdvrptw, client, cluster)
+    variance = 0
+    for ci in cluster:
+        dist = mdvrptw.distances[client][ci]
+        variance += (dist - avg_distance) * (dist - avg_distance)
+
+    return variance / (len(cluster)) #TODO CHECK SE FAZ N-1
+
+def three_criteria_clustering(mdvrptw, show_test=False):
+    clusters = []
+    for i in range(mdvrptw.number_of_clients+1, mdvrptw.number_of_clients+mdvrptw.number_of_depots+1):
+        clusters.append([i])
+
+    unclustered_clients = [0] * mdvrptw.number_of_clients
+    for i in range(mdvrptw.number_of_clients):
+        unclustered_clients[i] = i+1
+
+    clients_closest_cluster = [-1] * (mdvrptw.number_of_clients +1)
+    clients_second_cluster = [-1] * (mdvrptw.number_of_clients +1)
+    for client in unclustered_clients:
+        closest_cluster, second_cluster = get_two_closest_clusters(mdvrptw, client, clusters)
+        clients_closest_cluster[client] = closest_cluster
+        clients_second_cluster[client] = second_cluster
+
+
+    #indexers = [None] * (mdvrptw.number_of_clients+1)
+    number_of_clustered_clients = 0
+    while number_of_clustered_clients < mdvrptw.number_of_clients:
+
+        avg_distances = np.zeros((mdvrptw.number_of_clients+1, 3), dtype=int) # for each client, it stores the avg. distances to the first and second closest depot and the client index of the unclustered list
+        differences = np.zeros((mdvrptw.number_of_clients+1))
+        for index, client in enumerate(unclustered_clients):
+            avg_distances[client][0] = get_average_distance_client_to_cluster(mdvrptw, client, clusters[clients_closest_cluster[client]])
+            avg_distances[client][1] = get_average_distance_client_to_cluster(mdvrptw, client, clusters[clients_second_cluster[client]])    
+            avg_distances[client][2] = index
+            differences[client] = abs(avg_distances[client][0] - avg_distances[client][1])
+
+        max_idx = np.argmax(differences) #or max() if not np.
+        max_difference = differences[max_idx]
+        index = avg_distances[max_idx][2]
+
+        highest_avg_distance = avg_distances[max_idx][0] if avg_distances[max_idx][0] > avg_distances[max_idx][1] else avg_distances[max_idx][1]
+        if max_difference >= 0.1*highest_avg_distance:
+            closest_cluster = clients_closest_cluster[max_idx]
+            clusters[closest_cluster].append(max_idx)
+            unclustered_clients.pop(index)
+            number_of_clustered_clients += 1
+            continue
+
+        else: # SECOND CRITERIA (VARIANCE)
+            
+            indexers = np.zeros((mdvrptw.number_of_clients+1), dtype=int) #client index of unclustered clients list
+            variances = np.full((mdvrptw.number_of_clients+1), fill_value=float('inf')) 
+            for index, client in enumerate(unclustered_clients):
+                variances[client] = get_variance_of_avg_distance(mdvrptw, client, clusters[clients_closest_cluster[client]], avg_distances[client][0])
+                indexers[client] = index
+
+            min_idx = np.argmin(variances)
+            min_variance = variances[min_idx]
+            index = indexers[min_idx]
+
+            if min_variance <= 0.4*avg_distances[min_idx][0]:
+                closest_cluster = clients_closest_cluster[min_idx]
+                clusters[closest_cluster].append(min_idx)
+                unclustered_clients.pop(index)
+                number_of_clustered_clients += 1
+                continue
+
+                #TODO FALTA POP, PEGA O ID EM CIMA
+            else: #THIRD CRITERIA (CRUDE DISTANCE TO CLUSTER)
+
+                distances = np.full((mdvrptw.number_of_clients+1), fill_value=float('inf'))
+                indexers = np.zeros((mdvrptw.number_of_clients+1), dtype=int) #client index of unclustered clients list
+
+                for index,client in enumerate(unclustered_clients):
+                    closest_cluster = clients_closest_cluster[client]
+                    distances[client] = mdvrptw.distances[client][closest_cluster]
+                    indexers[client] = index
+
+                min_idx = np.argmin(distances)
+                min_distance = distances[min_idx]
+                index = indexers[min_idx]
+
+
+                #Assignment
+                closest_cluster = clients_closest_cluster[min_idx]
+                clusters[closest_cluster].append(min_idx)
+                unclustered_clients.pop(index)
+                number_of_clustered_clients += 1
+                continue
+
+    #TODO: AGR CORRIGIR SE A DEMANDA PASSOU, jogando os ultimos pra o proximo cluster mais prox q suporte
+    free_capacities = np.zeros((mdvrptw.number_of_depots))
+    for i in range(mdvrptw.number_of_depots):
+        free_capacities[i] = mdvrptw.number_of_vehicles * mdvrptw.depots[i].vehicle_capacity
+
+    for index, cluster in enumerate(clusters):
+        for ci in range(1, len(cluster)):
+            free_capacities[index] -= mdvrptw.demands[ci]
+
+    for index in range(len(free_capacities)):
+        if free_capacities[index] < 0:
+            print('precisa implementar a demanda da clusterizacao') #TODO chuta os ultimos pros clusters mais prox que suportem
+            exit(1)
+
+    #print(clusters)
+    return clusters
