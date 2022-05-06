@@ -19,6 +19,10 @@ class SoftwareSettings:
   def check_cluster(self, cluster):
     if cluster == 'Urgencies' or cluster == 'urgencies':
       return Settings.Urgencies
+    elif cluster == 'Closeness' or cluster == 'closeness':
+      return Settings.Closeness
+    elif cluster == 'ThreeCriteria' or cluster == 'threecriteria':
+      return Settings.ThreeCriteria
     else:
       return Settings.KMeans
 
@@ -66,6 +70,7 @@ class GRASPSettings:
 
     self.alpha = data['alpha']
     self.max_iterations = data['maxIterations']
+    self.block_solutions = data['blockSolutions']
     self.number_of_attempts = data['numberOfAttempts']
     self.local_search = self.check_local_search(data['localSearch'])
     local_search_string = "VND" if self.local_search == Settings.VND else 'LS'
