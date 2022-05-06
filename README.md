@@ -23,7 +23,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/israelpereira55/MDVRPTW-Solomon">
-    <img src="images/mona-lisa100K.gif" alt="Logo" width="500" height="500">
+    <img src="images/M101k10.jpg" alt="Logo" width="500" height="500">
   </a>
 
   <h3 align="center">Let's solve the MDVRPTW!</h3>
