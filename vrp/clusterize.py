@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from matplotlib import pyplot
 
@@ -427,3 +428,129 @@ def three_criteria_clustering(mdvrptw, show_test=False):
 
     #print(clusters)
     return clusters
+
+# Common functions
+def get_closest_depots_index(mdvrptw):
+    closest_depots_index = np.zeros((mdvrptw.number_of_clients +1))
+
+    for ci in range(1, mdvrptw.number_of_clients +1):
+
+        lowest_distance = mdvrptw.distances[ci][mdvrptw.depots[0].customer_id] #initiating with the distance of the first depot
+        closest_depot_index = mdvrptw.depots[0].index
+
+        for i in range(mdvrptw.number_of_depots):
+            depot = mdvrptw.depots[i]
+            depot_id = depot.customer_id
+            if mdvrptw.distances[ci][depot_id] < lowest_distance:
+                lowest_distance = mdvrptw.distances[ci][depot_id]
+                closest_depot_index = depot.index
+
+        closest_depots_index[ci] = closest_depot_index
+
+    return closest_depots_index
+
+
+# Article: New measures of proximity for the assignment algorithms in the MDVRPTW
+# Partial requirement
+# Note: We use [ei, li] as the earliest time of service (ei) and latest time of service (li) as defined on the classicals VRPTW/MDVRPTW formulations.
+def distance_time_windows(ei, li, ej, lj):
+    if   ei < lj:
+        return lj - ei
+    elif ej < li:
+        return li - ej
+    else:
+        return 0
+
+# Article: New measures of proximity for the assignment algorithms in the MDVRPTW
+# Partial requirement
+def calculate_affinity(mdvrptw, ci, cluster):
+    affinity = 0
+    for cj in cluster: # NEEDS TO SKIP FIRST AND CALCULATE DEPOT DIFFERENTLY
+        affinity += math.e ** (distance_time_windows(*mdvrptw.time_windows[ci], *mdvrptw.time_windows[cj]) + mdvrptw.travel_distances[ci][cj])
+    return affinity
+
+# L Tansini and O Viera, 2006
+# Article: New measures of proximity for the assignment algorithms in the MDVRPTW
+# Urgencies with parallel approach implemented using the new measures
+def clusterize_by_closeness(mdvrptw, show_test=False):
+    closest_depots_index = get_closest_depots_index(mdvrptw)
+
+    # Calculating affinity
+    clustered_clients = []
+    for i in range(mdvrptw.number_of_depots):
+        clustered_clients.append([])
+        clustered_clients[i].append(mdvrptw.depots[i].customer_id)
+
+    maximum_demands = np.zeros((mdvrptw.number_of_depots))
+    current_demands = np.zeros((mdvrptw.number_of_depots))
+    for i in range(mdvrptw.number_of_depots):
+        maximum_demands[i] = mdvrptw.depots[i].vehicle_capacity * mdvrptw.number_of_vehicles
+
+    is_client_clustered = np.zeros((mdvrptw.number_of_clients +1))
+    closenesses = np.zeros((mdvrptw.number_of_clients+1))
+
+    for number_of_routed_clients in range(1, mdvrptw.number_of_clients+1):
+        for ci in range(1, mdvrptw.number_of_clients+1):
+            closenesses[ci] = 0 # If the client is already clustered, its urgency is kept as 0.
+            if is_client_clustered[ci]:
+                continue
+
+            for d in range(mdvrptw.number_of_depots):
+                if closest_depots_index[ci] == d:
+                    continue
+
+                cluster = clustered_clients[d]
+                cj = mdvrptw.depots[d].customer_id
+                closenesses[ci] += mdvrptw.distances[ci][cj] / calculate_affinity(mdvrptw, ci, cluster)
+            
+            d = closest_depots_index[ci]
+            cluster = clustered_clients[d]
+            cj = mdvrptw.depots[d].customer_id
+            closenesses[ci] -= mdvrptw.distances[ci][cj] / calculate_affinity(mdvrptw, ci, cluster)
+
+        max_value = max(closenesses)
+        max_index = closenesses.index(max_value)
+
+        client = max_index
+        d = closest_depots_index[client]
+        demand = mdvrptw.mdvrp.demands[ci]
+
+        if current_demands[d] + demand > maximum_demands[d]:
+            #Finding the second closest depot that has free demand to allow it, so, we will be changing d.
+            lowest_distance = float('inf')
+            closest_depot_index = -1
+            for d in range(mdvrptw.number_of_depots):
+
+                if d == closest_depots_index[client]: #TODO CHEEEEECK
+                    continue
+
+                depot = mdvrptw.depots[d]
+                depot_id = depot.customer_id
+                if (mdvrptw.distances[client][depot_id] < lowest_distance) and (current_demands[d] + demand <= maximum_demands[d]):
+                    lowest_distance = mdvrptw.distances[client][depot_id]
+                    closest_depot_index = d 
+
+            if closest_depot_index == -1:
+                print("[ERROR]: The clusterization could not complete.\nAborting...")
+                exit(1)
+            d = closest_depots_index
+
+        # On every iteration, a client will be appended to a depot.
+        clustered_clients[d].append(client)
+        current_demands[d] += demand
+
+    # Validating:
+    sumatory = 0
+    for clustered_depot in clustered_clients:
+        sumatory += len(clustered_depot)
+    
+    if show_test:
+        for clustered_depot in clustered_clients:
+            print(f"Depot size:{len(clustered_depot)}", clustered_depot)
+        print("Number of clients:", sumatory)
+
+    if sumatory != mdvrptw.number_of_clients + mdvrptw.number_of_depots:
+        print("[ERROR]: The clusterization results seems to be incomplete.\nAborting...")
+        exit(1)
+
+    return clustered_clients
