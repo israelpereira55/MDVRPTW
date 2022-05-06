@@ -21,7 +21,17 @@ def main(argv):
     grasp_settings = GRASPSettings('./settings/grasp.json', print_settings=True)
     aco_settings = ACOSettings('./settings/aco.json', print_settings=True)
     solomon_settings = SolomonSettings('./settings/solomon.json', print_settings=True)
-    # =====================================================
+    # ====================================================
+
+    # ============ CHECKING SETTINGS =====================
+    if grasp_settings.block_solutions > grasp_settings.max_iterations:
+        grasp_settings.block_solutions = grasp_settings.max_iterations
+        print("[WARN]: Reactive GRASP 'max_iterations' is lower than 'block_solutions'. Updating 'block_solutions' to 'max_iterations' value.")
+
+    if grasp_settings.max_iterations % grasp_settings.block_solutions != 0:
+        grasp_settings.max_iterations = grasp_settings.max_iterations - (grasp_settings.max_iterations % grasp_settings.block_solutions) + grasp_settings.block_solutions
+        print("[WARN]: Reactive GRASP 'block_solutions' is not a multiple of 'max_iterations'. Updating 'max_iterations' value to a higher value.")
+    # ====================================================
 
     mdvrptw = None
     if FLAGS.instance is not None:
@@ -49,10 +59,16 @@ def main(argv):
         # Article: New assignment algorithms for the multi-depot vehicle routing problem
         clustered_clients = clusterize.clusterize_by_urgencies(mdvrptw)
 
-    elif software.cluster == Settings.ThreeCriteriaClustering:
+    elif software.cluster == Settings.ThreeCriteria: #TODO: needs testing
         # GIOSA, 2002
         # Article: New assignment algorithms for the multi-depot vehicle routing problem
         clustered_clients = clusterize.three_criteria_clustering(mdvrptw, show_test=False)
+
+    elif software.cluster == Settings.Closeness:
+        # L Tansini and O Viera, 2006
+        # Article: New measures of proximity for the assignment algorithms in the MDVRPTW
+        # Urgencies with parallel approach implemented using the new measures (Closeness), which considers time windows and distances.
+        clustered_clients = clusterize.clusterize_by_closeness(mdvrptw)
 
     elif software.cluster == 'other': #TODO: Needs fixing
         model = Birch(threshold=0.01, n_clusters=mdvrptw.number_of_depots) #fit and predict
@@ -142,6 +158,10 @@ def main(argv):
         print(f'[IPGRASP]: Best solution {best_cost} alpha {alpha}')
         print("Time avg:", (time_end - time_start)/aco_settings.m)
     # =====================================================
+
+    if best_solution == None:
+        print("Could not generate any feasible solution. Please check parameters.\n")
+        return
 
     best_solution.print_solution()
     plot.plot_mdvrptw_solution(best_solution)
