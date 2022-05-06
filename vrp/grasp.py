@@ -16,6 +16,7 @@ def construct_solution_with_solomon(mdvrptw, clustered_clients, grasp_settings, 
 
     sum_solutions = 0
     failed_attempts=0
+    constructed_viable_solution = False
     if print_progress: time_start = time.time()
 
     for i in range(grasp_settings.max_iterations):
@@ -28,8 +29,13 @@ def construct_solution_with_solomon(mdvrptw, clustered_clients, grasp_settings, 
             if failed_attempts > grasp_settings.number_of_attempts:
                 if print_progress:
                     print(f"[GRASP]: Iteration={i}. Number of infeasible generated solutions surpassed the maximum allowed: {grasp_settings.number_of_attempts}. Aborting...")
-                return None
+                
+                if constructed_viable_solution:
+                    return mdvrptw_best_solution
+                else:
+                    return None
 
+        constructed_viable_solution = True
         if grasp_settings.local_search == Settings.VND:
             local_search.vnd(mdvrptw_solution)
         else:
@@ -155,8 +161,8 @@ def reactive_grasp(mdvrptw, clustered_clients, grasp_settings, solomon_settings,
     solutions, best_solution = initial_population(mdvrptw, clustered_clients, grasp_settings, solomon_settings)
 
     if best_solution is None:
-        print("[REACTIVE GRASP]: Could not generate any feasible solution. Please check parameters. Aborting...\n")
-        exit(1)
+        print("[REACTIVE GRASP]: Could not generate any feasible solution. Please check parameters.\n")
+        return None
 
     best_cost = best_solution.get_travel_distance()
     time_end = time.time()
@@ -176,7 +182,7 @@ def reactive_grasp(mdvrptw, clustered_clients, grasp_settings, solomon_settings,
     sum_solutions = 0
     failed_attempts = 0
     while it < grasp_settings.max_iterations:
-        for i in range(100):
+        for i in range(grasp_settings.block_solutions):
             alpha, alpha_index = reactive_grasp_select_alpha(alphas, probabilities)
 
             mdvrptw_solution = grasp_mdvrptw(mdvrptw, clustered_clients, alpha, solomon_settings)
