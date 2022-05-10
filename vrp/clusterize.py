@@ -431,7 +431,7 @@ def three_criteria_clustering(mdvrptw, show_test=False):
 
 # Common functions
 def get_closest_depots_index(mdvrptw):
-    closest_depots_index = np.zeros((mdvrptw.number_of_clients +1))
+    closest_depots_index = np.zeros((mdvrptw.number_of_clients +1), dtype=int)
 
     for ci in range(1, mdvrptw.number_of_clients +1):
 
@@ -464,9 +464,13 @@ def distance_time_windows(ei, li, ej, lj):
 # Article: New measures of proximity for the assignment algorithms in the MDVRPTW
 # Partial requirement
 def calculate_affinity(mdvrptw, ci, cluster):
-    affinity = 0
-    for cj in cluster: # NEEDS TO SKIP FIRST AND CALCULATE DEPOT DIFFERENTLY
-        affinity += math.e ** (distance_time_windows(*mdvrptw.time_windows[ci], *mdvrptw.time_windows[cj]) + mdvrptw.travel_distances[ci][cj])
+    d = cluster[0] - mdvrptw.number_of_clients -1
+    depot = mdvrptw.depots[d]
+    affinity = math.e ** -(distance_time_windows(*mdvrptw.time_windows[ci], depot.ready_time, depot.due_date) + mdvrptw.travel_times[ci][cluster[0]])
+
+    for j in range(1, len(cluster)):
+        cj = cluster[j]
+        affinity += math.e ** -(distance_time_windows(*mdvrptw.time_windows[ci], *mdvrptw.time_windows[cj]) + mdvrptw.travel_times[ci][cj])
     return affinity
 
 # L Tansini and O Viera, 2006
@@ -487,7 +491,8 @@ def clusterize_by_closeness(mdvrptw, show_test=False):
         maximum_demands[i] = mdvrptw.depots[i].vehicle_capacity * mdvrptw.number_of_vehicles
 
     is_client_clustered = np.zeros((mdvrptw.number_of_clients +1))
-    closenesses = np.zeros((mdvrptw.number_of_clients+1))
+    #closenesses = np.zeros((mdvrptw.number_of_clients+1)) #TODO
+    closenesses = [0] * (mdvrptw.number_of_clients+1)
 
     for number_of_routed_clients in range(1, mdvrptw.number_of_clients+1):
         for ci in range(1, mdvrptw.number_of_clients+1):
