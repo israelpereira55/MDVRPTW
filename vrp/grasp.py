@@ -69,20 +69,20 @@ def grasp_mdvrptw(mdvrptw, clustered_clients, alpha, solomon_settings):
 # Initial population by GRASP - IPGRASP
 # (m)  number of solutions
 def initial_population(mdvrptw, clustered_clients, grasp_settings, solomon_settings, print_progress=False):
-    solutions = []
     m, base_alpha = grasp_settings.m, grasp_settings.base_alpha
     max_iterations = grasp_settings.max_iterations
     grasp_settings.max_iterations=1
 
-    initial_alpha = grasp_settings.alpha
+    solutions = [None]*m
     best_solution = None
     best_cost = float('inf')
+    initial_alpha = grasp_settings.alpha
     for i in range(m):
         alpha = base_alpha + (i/(m-1) * (1-base_alpha))
 
         grasp_settings.alpha = alpha
         solution = construct_solution_with_solomon(mdvrptw, clustered_clients, grasp_settings, solomon_settings)
-        solutions.append(solution)
+        solutions[i] = solution
 
         if solution != None:
             cost = solution.get_travel_distance()
@@ -173,7 +173,7 @@ def reactive_grasp(mdvrptw, clustered_clients, grasp_settings, solomon_settings,
         if solutions[i] != None:
             values_sum[i] = solutions[i].get_travel_distance()
         else:
-            values_sum[i] = 100000 #TODO: make it to relationated to the instance value. Maybe get the worst cost and multiply by 10.
+            values_sum[i] = best_cost*10
 
     number_of_solutions = np.full((m), 1) #for each alpha, the number of solutions generated with that alpha. It started with 1 because the initial population.
     reactive_grasp_update_probabilities(probabilities, values_sum, number_of_solutions, best_cost, gamma)
@@ -181,11 +181,13 @@ def reactive_grasp(mdvrptw, clustered_clients, grasp_settings, solomon_settings,
     it = 0
     sum_solutions = 0
     failed_attempts = 0
+    total_failed_attemps = 0
     while it < grasp_settings.max_iterations:
         for i in range(grasp_settings.block_solutions):
             alpha, alpha_index = reactive_grasp_select_alpha(alphas, probabilities)
 
             mdvrptw_solution = grasp_mdvrptw(mdvrptw, clustered_clients, alpha, solomon_settings)
+            failed_attempts = 0
             while not mdvrptw_solution.is_feasible_by_number_of_vehicles():
 
                 # If the alpha selected was infeasible, it's probability will be reduced and a new alpha will be selected.
@@ -197,6 +199,7 @@ def reactive_grasp(mdvrptw, clustered_clients, grasp_settings, solomon_settings,
                 mdvrptw_solution = grasp_mdvrptw(mdvrptw, clustered_clients, alpha, solomon_settings)
 
                 failed_attempts += 1
+                total_failed_attemps += 1
                 if failed_attempts > grasp_settings.number_of_attempts:
                     print(f"[REACTIVE GRASP]: Iteration={i}. Number of infeasible generated solutions surpassed the maximum allowed: {grasp_settings.number_of_attempts}. Aborting...")
                     return best_solution
@@ -226,7 +229,7 @@ def reactive_grasp(mdvrptw, clustered_clients, grasp_settings, solomon_settings,
         it += 100
 
     if print_progress:
-        print(f'\n[REACTIVE GRASP]: Number of infeasible generated solutions={failed_attempts}.\n'
+        print(f'\n[REACTIVE GRASP]: Number of infeasible generated solutions={total_failed_attemps}.\n'
         f'[REACTIVE GRASP]: Average cost of solutions={round(sum_solutions/it, 2)}.\n'
         f'[REACTIVE GRASP]: Best solution={round(best_solution.get_travel_distance(), 2)}.')
 
