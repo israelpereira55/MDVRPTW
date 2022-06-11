@@ -2,17 +2,18 @@
     "settings": "GRASP_Settings",
 
     "localSearch" : "VND",
-    
-    "maxIterations" : 100,
-    "numberOfAttempts" : 10,
 
     "alpha" : 0.582,
+    
+    "maxIterations" : 5000,
+    "blockSolutions" : 100,
+    "numberOfAttempts" :20,
 
     "m" : 100,
     "baseAlpha" : 0.1,
-    "blockSolutions" : 100,
 
     "comment" : "localSearch in [LS, VND];",
     "comment2" : "maxIterations should be multiple of blockSolutions;",
-    "comment3" : "alpha is only used by GRASP; m, baseAlpha and blockSolutions are Reactive GRASP parameters; other parameters are used by all GRASP variations."
+    "comment3" : "alpha is only used by GRASP; m, baseAlpha and blockSolutions are Reactive GRASP parameters; other parameters are used by all GRASP variations.",
+    "comment4" : "numberOfAttempts is the number of CONSECUTIVE attempts GRASP will perform."
 }
