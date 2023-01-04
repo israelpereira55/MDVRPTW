@@ -31,7 +31,7 @@
   <p align="center">
     This is an algorithm that seeks to solve the MDVRPTW. 
     <br />
-    The GRASP version of the project was published on Computational Science and Its Applications – ICCSA 2022: 22nd International Conference, Malaga, Spain, July 4–7, 2022.
+    The GRASP version of this project for the MDVRP was published on Computational Science and Its Applications – ICCSA 2022: 22nd International Conference, Malaga, Spain, July 4–7, 2022.
     <br />
   </p>
 </p>
