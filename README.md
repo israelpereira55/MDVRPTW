@@ -64,9 +64,19 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-The Vehicle Routing Problem (VRP) is a known combinatorial problem for it's difficult NP-hard. On this project, we seek to solve the Multi Depot Vehicle Routing Problem with Time Windows (MDVRPTW) which is harder!. 
+The Vehicle Routing Problem (VRP) is a known combinatorial problem for it's difficult NP-hard. On this project, we seek to solve the Multi Depot Vehicle Routing Problem with Time Windows (MDVRPTW). 
 
-First we use a set of cluster methods to clusterize the depots and after that the Solomon I1 Insertion Heuristic is used to construct the initial solution. And then... WIP =).
+We adopt the cluster-first route-second approach. For this, the customers are clustered considering each depot as the cluster center (each depot creates a cluster). Then the construction process is applied to generate solutions.
+
+Currently, we use a randomized version of Solomon I1 Insertion Heuristic as the constructive algorithm. The random decisions are administrated by GRASP metaheuristic. After the construction process, a set of local search methods are applied. The local search can be intra-depot and inter-depot. The former considers each cluster as a complete problem and the later considers all clusters to improve the solution. In this project we consider both intra-depot and inter-depot local search methods.
+
+The GRASP version of the project was published on Computational Science and Its Applications – ICCSA 2022: 22nd International Conference, Malaga, Spain, July 4–7, 2022. [Full article](https://link.springer.com/chapter/10.1007/978-3-031-10562-3_7).
+
+We also aim to develop a Ant Colony Optimization algorithm, instead of GRASP, to solve the problem. Which is in progress...
+
+For now, you can use the GRASP version.
+
+**_If you use this code, please cite our article._**
 
 
 
