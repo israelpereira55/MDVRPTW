@@ -64,15 +64,15 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-The Vehicle Routing Problem (VRP) is a known combinatorial problem for it's difficult NP-hard. On this project, we seek to solve the Multi Depot Vehicle Routing Problem with Time Windows (MDVRPTW). 
+The Vehicle Routing Problem (VRP) is a known hard-to-solve combinatorial problem (NP-hard). In this project, we seek to solve the Multi Depot Vehicle Routing Problem with Time Windows (MDVRPTW). 
 
 We adopt the cluster-first route-second approach. For this, the customers are clustered considering each depot as the cluster center (each depot creates a cluster). Then the construction process is applied to generate solutions.
 
-Currently, we use a randomized version of Solomon I1 Insertion Heuristic as the constructive algorithm. The random decisions are administrated by GRASP metaheuristic. After the construction process, a set of local search methods are applied. The local search can be intra-depot and inter-depot. The former considers each cluster as a complete problem and the later considers all clusters to improve the solution. In this project we consider both intra-depot and inter-depot local search methods.
+Currently, we use a randomized version of the Solomon I1 Insertion Heuristic as the constructive algorithm. The random decisions are administrated by the GRASP metaheuristic. After the construction process, a set of local search methods are applied. The local search can be intra-depot and inter-depot. The former considers each cluster as a complete problem and the latter considers all clusters to improve the solution. In this project, we consider both intra-depot and inter-depot local search methods.
 
 The GRASP version of the project was published on Computational Science and Its Applications – ICCSA 2022: 22nd International Conference, Malaga, Spain, July 4–7, 2022. [Full article](https://link.springer.com/chapter/10.1007/978-3-031-10562-3_7).
     
-We also aim to develop a Ant Colony Optimization algorithm, instead of GRASP, to solve the problem. Which is in progress...
+We also aim to develop an Ant Colony Optimization algorithm, instead of GRASP, to solve the problem. Which is in progress...
 
 For now, you can use the GRASP version.
 
@@ -91,10 +91,10 @@ A set of clustering methods are utilized.
 <!-- GETTING STARTED -->
 ## Getting Started
 
-First you need a MDVRPTW problem instancy, which you can get on VRP Libraries.
+First, you need an MDVRPTW problem instance, which you can get on VRP Libraries.
 We will list some libraries in which you can get them. We have the "instances" folder with Cordeuat and Vidal MDVRPTW instances, mostly for backup purposes but You can use them too!
 
-You can also make your own instance, but it needs to follow Cordeaut standards. 
+You can also make your instance, but it needs to follow Cordeaut standards. 
 
 * [VRP-REP](http://www.vrp-rep.org/variants/item/mdvrptw.html)
 * [NEO LCC](https://neo.lcc.uma.es/vrp/vrp-instances/multiple-depot-vrp-instances/)
