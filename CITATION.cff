@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Souza"
+  given-names: "Israel"
+  orcid: "https://orcid.org/0000-0002-3745-5530"
+title: "israelpereira55/MDVRPTW: RGRASP+VND v0.1"
+version: v0.1
+doi: 10.5281/zenodo.11128366 
+date-released: 2024-05-07
+url: "https://github.com/israelpereira55/MDVRPTW"
